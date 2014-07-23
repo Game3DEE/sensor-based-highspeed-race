@@ -5,7 +5,8 @@
 	</head> 
 	<body> 
 	<script src="js/three.min.js"></script> 
-	<script src=”js/OrbitControls.js”></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/ColladaLoader.js"></script>
 	<script> 
 		var scene, camera, renderer;
     init();
@@ -54,6 +55,24 @@
 	  var pointLightHelper3 = new THREE.PointLightHelper( light3, sphereSize ); 
 	  scene.add( pointLightHelper3 );
 	  
+	  
+	  var loader = new THREE.ColladaLoader();
+
+	  loader.options.convertUpAxis = true;
+
+	  loader.load( 'models/FullTrack.dae', function ( collada ) {
+      //dummy1.dae
+
+		var dae = collada.scene;
+
+		var skin = collada.skins[ 0 ];
+
+		dae.position.set(0,0,0);//x,z,y- if you think in blender dimensions ;)
+		dae.scale.set(1.5,1.5,1.5);
+
+		scene.add(dae);
+
+	  });
 	  
 	  controls = new THREE.OrbitControls(camera, renderer.domElement);
 	 }
