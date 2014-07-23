@@ -1,3 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Test von Web GL</title>
+<meta charset="utf-8">
+</head>
+<body style="margin: 0;">
+ 
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/ColladaLoader.js"></script>
+
+<script src="js/Car.js"></script>
+ 
+ 
+<script type="x-shader/x-vertex" id="vertexShader">
+ 
+	varying vec3 vWorldPosition;
+	 
+	void main() {
+	 
+		vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+		vWorldPosition = worldPosition.xyz;
+		 
+		gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+	 
+	}
+ 
+</script>
+ 
+<script type="x-shader/x-fragment" id="fragmentShader">
+ 
+	uniform vec3 topColor;
+	uniform vec3 bottomColor;
+	uniform float offset;
+	uniform float exponent;
+	 
+	varying vec3 vWorldPosition;
+	 
+	void main() {
+	 
+	float h = normalize( vWorldPosition + offset ).y;
+	gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( h, exponent ), 0.0 ) ), 1.0 );
+	 
+	}
+	 
+</script>
+<script>
+ 
+var scene, camera, renderer, veyron;
+var config = {
+	"veyron"	: { r: 0.5,	 model: null, backCam: new THREE.Vector3( 550, 100, -1000 ) },
+};
+init();
+animate();
+ 
+function init() {
+ 
+	scene = new THREE.Scene();
+	var WIDTH = window.innerWidth,
+	HEIGHT = window.innerHeight;
+	 
+	renderer = new THREE.WebGLRenderer({antialias:true});
+	renderer.setSize(WIDTH, HEIGHT);
+	document.body.appendChild(renderer.domElement);
+	 
+	 
+	camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 10000);
+	camera.position.set(50,150,100);
+	scene.add(camera);
+	 
+	window.addEventListener('resize', function() {
+	var WIDTH = window.innerWidth,
+	HEIGHT = window.innerHeight;
+	renderer.setSize(WIDTH, HEIGHT);
+	camera.aspect = WIDTH / HEIGHT;
+	camera.updateProjectionMatrix();
+
+	// MATERIALS
+
+	var cubeTarget = cubeCamera.renderTarget;
+
+	mlib = {
+
+		body: [],
+
+		"Chrome": new THREE.MeshLambertMaterial( { color: 0xffffff, ambient: 0xffffff, envMap: cubeTarget  } ),
+
+		"Dark chrome": new THREE.MeshLambertMaterial( { color: 0x444444, ambient: 0x444444, envMap: cubeTarget } ),
+
+		"Black rough": new THREE.MeshLambertMaterial( { color: 0x050505, ambient: 0x050505 } ),
+
+		"Dark glass": new THREE.MeshLambertMaterial( { color: 0x101020, ambient: 0x101020, envMap: cubeTarget, opacity: 0.5, transparent: true } ),
+		"Orange glass": new THREE.MeshLambertMaterial( { color: 0xffbb00, ambient: 0xffbb00, opacity: 0.5, transparent: true } ),
+		"Red glass": new THREE.MeshLambertMaterial( { color: 0xff0000, ambient: 0xff0000, opacity: 0.5, transparent: true } ),
+
+		"Black metal": new THREE.MeshLambertMaterial( { color: 0x222222, ambient: 0x222222, envMap: cubeTarget, combine: THREE.MultiplyOperation } ),
+		"Orange metal": new THREE.MeshLambertMaterial( { color: 0xff6600, ambient: 0xff6600, envMap: cubeTarget, combine: THREE.MultiplyOperation } )
+
+	}
+
+	mlib.body.push( [ "Orange", new THREE.MeshLambertMaterial( { color: 0x883300, ambient: 0x883300, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.1 } ) ] );
+	mlib.body.push( [ "Blue", new THREE.MeshLambertMaterial( { color: 0x113355, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.1 } ) ] );
+	mlib.body.push( [ "Red", new THREE.MeshLambertMaterial( { color: 0x660000, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.1 } ) ] );
+	mlib.body.push( [ "Black", new THREE.MeshLambertMaterial( { color: 0x000000, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.2 } ) ] );
+	mlib.body.push( [ "White", new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.2 } ) ] );
+
+	mlib.body.push( [ "Carmine", new THREE.MeshPhongMaterial( { color: 0x770000, specular: 0xffaaaa, envMap: cubeTarget, combine: THREE.MultiplyOperation } ) ] );
+	mlib.body.push( [ "Gold", new THREE.MeshPhongMaterial( { color: 0xaa9944, specular: 0xbbaa99, shininess: 50, envMap: cubeTarget, combine: THREE.MultiplyOperation } ) ] );
+	mlib.body.push( [ "Bronze", new THREE.MeshPhongMaterial( { color: 0x150505, specular: 0xee6600, shininess: 10, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.2 } ) ] );
+	mlib.body.push( [ "Chrome", new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0xffffff, envMap: cubeTarget, combine: THREE.MultiplyOperation } ) ] );
+
+	// FLARES
+
+	flareA = THREE.ImageUtils.loadTexture( "textures/lensflare2.jpg" );
+	flareB = THREE.ImageUtils.loadTexture( "textures/lensflare0.png" );	
+	// CARS - VEYRON
+
+	veyron = new THREE.Car();
+
+	veyron.modelScale = 3;
+	veyron.backWheelOffset = 2;
+
+	veyron.callback = function( object ) {
+
+		addCar( object, -300, -215, 0, 0 );
+		setMaterialsVeyron( object );
+
+		var sa = 2, sb = 5;
+
+		var params  = {
+
+			"a" : { map: flareA, useScreenCoordinates: false, color: 0xffffff, blending: THREE.AdditiveBlending },
+			"b" : { map: flareB, useScreenCoordinates: false, color: 0xffffff, blending: THREE.AdditiveBlending },
+
+			"ar" : { map: flareA, useScreenCoordinates: false, color: 0xff0000, blending: THREE.AdditiveBlending },
+			"br" : { map: flareB, useScreenCoordinates: false, color: 0xff0000, blending: THREE.AdditiveBlending }
+
+		};
+=======
 <html> 
 	<head> 
 		<title>sensor-based-highspeed-race</title> 
@@ -84,6 +224,178 @@
     }
 	
 	</script> 
+>>>>>>> .r12
 
-	</body> 
+		var flares = [
+			// front
+			[ "a", sa, [ 47, 38, 120 ] ], [ "a", sa, [ 40, 38, 120 ] ], [ "a", sa, [ 32, 38, 122 ] ],
+			[ "b", sb, [ 47, 38, 120 ] ], [ "b", sb, [ 40, 38, 120 ] ], [ "b", sb, [ 32, 38, 122 ] ],
+			[ "a", sa, [ -47, 38, 120 ] ], [ "a", sa, [ -40, 38, 120 ] ], [ "a", sa, [ -32, 38, 122 ] ],
+			[ "b", sb, [ -47, 38, 120 ] ], [ "b", sb, [ -40, 38, 120 ] ], [ "b", sb, [ -32, 38, 122 ] ],
+			// back
+			[ "ar", sa, [ 22, 50, -123 ] ], [ "ar", sa, [ 32, 49, -123 ] ],
+			[ "br", sb, [ 22, 50, -123 ] ], [ "br", sb, [ 32, 49, -123 ] ],
+			[ "ar", sa, [ -22, 50, -123 ] ], [ "ar", sa, [ -32, 49, -123 ] ],
+			[ "br", sb, [ -22, 50, -123 ] ], [ "br", sb, [ -32, 49, -123 ] ],
+		];
+
+		for ( var i = 0; i < flares.length; i ++ ) {
+
+			var p = params[ flares[ i ][ 0 ] ];
+
+			var s = flares[ i ][ 1 ];
+
+			var x = flares[ i ][ 2 ][ 0 ];
+			var y = flares[ i ][ 2 ][ 1 ];
+			var z = flares[ i ][ 2 ][ 2 ];
+
+			var material = new THREE.SpriteMaterial( p );
+			var sprite = new THREE.Sprite( material );
+
+			var spriteWidth = 128;
+			var spriteHeight = 128;
+
+			sprite.scale.set( s * spriteWidth, s * spriteHeight, s );
+			sprite.position.set( x, y, z );
+
+			object.bodyMesh.add( sprite );
+
+			sprites.push( sprite );
+
+		}
+
+	};
+
+	veyron.loadPartsBinary( "models/veyron_body_bin.js", "models/veyron_wheel_bin.js" );
+					config[ "veyron" ].model = veyron;
+
+				currentCar = gallardo;
+});
+function setMaterialsVeyron( car ) {
+
+	// 0 - top, front center, back sides
+	// 1 - front sides
+	// 2 - engine
+	// 3 - small chrome things
+	// 4 - backlights
+	// 5 - back signals
+	// 6 - bottom, interior
+	// 7 - windshield
+
+	// BODY
+
+	var materials = car.bodyMaterials;
+
+	materials[ 0 ] = mlib[ "Black metal" ];	// top, front center, back sides
+	materials[ 1 ] = mlib[ "Chrome" ];			// front sides
+	materials[ 2 ] = mlib[ "Chrome" ];			// engine
+	materials[ 3 ] = mlib[ "Dark chrome" ];	// small chrome things
+	materials[ 4 ] = mlib[ "Red glass" ];		// backlights
+	materials[ 5 ] = mlib[ "Orange glass" ];	// back signals
+	materials[ 6 ] = mlib[ "Black rough" ];	// bottom, interior
+	materials[ 7 ] = mlib[ "Dark glass" ];		// windshield
+
+	// WHEELS
+
+	materials = car.wheelMaterials;
+
+	materials[ 0 ] = mlib[ "Chrome" ];			// insides
+	materials[ 1 ] = mlib[ "Black rough" ];	// tire
+
+}
+ 
+	var vertexShader = document.getElementById( 'vertexShader' ).textContent;
+	var fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
+	var uniforms = {
+	topColor: { type: "c", value: new THREE.Color(0x000000) },
+	bottomColor: { type: "c", value: new THREE.Color( 0x262626 ) },
+	offset:	{ type: "f", value: 100 },
+	exponent:	{ type: "f", value: 0.7 }
+}
+ 
+ 
+	var light = new THREE.PointLight(0xfffff3, 0.7);
+	light.position.set(25,5000,25);
+	scene.add(light);
+	 
+	var loader = new THREE.ColladaLoader();
+	 
+	loader.options.convertUpAxis = true;
+	 
+	loader.load( 'models/MountainValley_Track.dae', function ( collada ) {
+	//dummy1.dae
+	var dae = collada.scene;
+	var skin = collada.skins[ 0 ];
+	dae.position.set(0,0,0);//x,z,y- if you think in blender dimensions ;)
+	dae.scale.set(1.5,1.5,1.5);
+	 
+	scene.add(dae);
+	 
+	var axes = new THREE.AxisHelper(50);
+	axes.position = dae.position;
+	scene.add(axes);
+	var gridXZ = new THREE.GridHelper(100, 10);
+	gridXZ.setColors( new THREE.Color(0x8f8f8f), new THREE.Color(0x8f8f8f) );
+	gridXZ.position.set(0,0,0 );
+	scene.add(gridXZ);
+	});
+	 
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	 
+}
+ 
+function addCar( object, x, y, z, s ) {
+
+	object.root.position.set( x, y, z );
+	scene.add( object.root );
+
+	object.enableShadows( true );
+
+	if ( FOLLOW_CAMERA && object == currentCar ) {
+
+		object.root.add( camera );
+
+		camera.position.set( 350, 500, 2200 );
+		//camera.position.set( 0, 3000, -500 );
+
+		cameraTarget.z = 500;
+		cameraTarget.y = 150;
+
+		camera.lookAt( cameraTarget );
+
+	}
+
+	var shadowTexture = generateDropShadowTexture( object.bodyMesh, 64, 32, 15 );
+
+	object.bodyMesh.geometry.computeBoundingBox();
+	var bb = object.bodyMesh.geometry.boundingBox;
+
+	var ss = object.modelScale * 1.1;
+	var shadowWidth  =        ss * ( bb.max.z - bb.min.z );
+	var shadowHeight = 1.25 * ss * ( bb.max.x - bb.min.x );
+
+	var shadowPlane = new THREE.PlaneGeometry( shadowWidth, shadowHeight );
+	var shadowMaterial = new THREE.MeshBasicMaterial( {
+		color: 0xffffff, opacity: 0.5, transparent: true, map: shadowTexture,
+		polygonOffset: false, polygonOffsetFactor: -0.5, polygonOffsetUnits: 1
+	} );
+
+	var shadow = new THREE.Mesh( shadowPlane, shadowMaterial );
+	shadow.position.y = s + 10;
+	shadow.rotation.x = - Math.PI / 2;
+	shadow.rotation.z = Math.PI / 2;
+
+	object.root.add( shadow );
+
+} 
+function animate() {
+ 
+	requestAnimationFrame(animate);
+	renderer.render(scene, camera);
+	controls.update();
+ 
+}
+ 
+</script>
+</body>
 </html>
