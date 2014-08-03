@@ -33,7 +33,7 @@
 <script src="js/Detector.js"></script>
 <script src="js/stats.min.js"></script>
 
- 
+<script type="text/javascript" src="js/physi.js"></script>
  
 <script type="x-shader/x-vertex" id="vertexShader">
  
@@ -69,6 +69,10 @@
 </script>
 <script>
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+'use strict';
+
+Physijs.scripts.worker = '/js/physijs_worker.js';
+Physijs.scripts.ammo = '/js/ammo.js';
 
 var FOLLOW_CAMERA = true;
 
@@ -148,19 +152,15 @@ function init() {
  
  
  
- 
- 
- 
  				camera = new THREE.PerspectiveCamera( 18, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 100000 );
-				camera.position.set( 3000, 0, 3000 );
+				camera.position.set( 0, 0, 0 );
 
 				cameraTarget = new THREE.Vector3();
 
-				scene = new THREE.Scene();
-
+				scene = new Physijs.Scene;
 				// LIGHTS
 
-				spotLight = new THREE.SpotLight( 0xffffff, 0.1, 0, Math.PI/2, 1 );
+				spotLight = new THREE.SpotLight( 0xffffff, 1, 0, Math.PI/2, 1 );
 				spotLight.position.set( 0, 1800, 1500 );
 				spotLight.target.position.set( 0, 0, 0 );
 				spotLight.castShadow = true;
@@ -203,7 +203,6 @@ function init() {
 				scene.add( cubeCamera );
 
 				// MATERIALS
-
 				var cubeTarget = cubeCamera.renderTarget;
 
 				mlib = {
@@ -312,9 +311,6 @@ function init() {
 
 				// EVENTS
 
-				document.addEventListener( 'keydown', onKeyDown, false );
-				document.addEventListener( 'keyup', onKeyUp, false );
-
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				// POSTPROCESSING
@@ -399,9 +395,7 @@ function init() {
 	var skin = collada.skins[ 0 ];
 	dae.position.set(0,0,0);//x,z,y- if you think in blender dimensions ;)
 	dae.scale.set(35,35,35);
-	 
-	scene.add(dae);
-	 
+	scene.add(dae);	
 	var axes = new THREE.AxisHelper(50);
 	axes.position = dae.position;
 	scene.add(axes);
@@ -549,15 +543,14 @@ function init() {
 			function addCar( object, x, y, z, s ) {
 
 				object.root.position.set( x, y, z );
-				scene.add( object.root );
 
 				object.enableShadows( true );
-
+				
 				if ( FOLLOW_CAMERA ) {
 
 					object.root.add( camera );
 
-					camera.position.set( 50, 150, -1300 );
+					camera.position.set( 0, 0, 0 );
 					//camera.position.set( 0, 3000, -500 );
 
 					cameraTarget.z = 500;
@@ -581,13 +574,87 @@ function init() {
 					color: 0xffffff, opacity: 0.5, transparent: true, map: shadowTexture,
 					polygonOffset: false, polygonOffsetFactor: -0.5, polygonOffsetUnits: 1
 				} );
+				
+				
+				var mesh = new Physijs.BoxMesh(
+					object.bodyMesh.geometry,
+					new THREE.MeshFaceMaterial( object.bodyMaterials )
+				);
+				mesh.position.y = 2;
+				mesh.castShadow = mesh.receiveShadow = true;
 
-				var shadow = new THREE.Mesh( shadowPlane, shadowMaterial );
-				shadow.position.y = s + 10;
-				shadow.rotation.x = - Math.PI / 2;
-				shadow.rotation.z = Math.PI / 2;
+				vehicle = new Physijs.Vehicle(mesh, new Physijs.VehicleTuning(
+					10.88,
+					1.83,
+					0.28,
+					500,
+					10.5,
+					6000
+				));
+				scene.add( vehicle );
 
-				object.root.add( shadow );
+				var wheel_material = new THREE.MeshFaceMaterial( object.wheelMaterials );
+
+				for ( var i = 0; i < 4; i++ ) {
+					vehicle.addWheel(
+						object.wheelGeometry,
+						wheel_material,
+						new THREE.Vector3(
+								i % 2 === 0 ? -1.6 : 1.6,
+								-1,
+								i < 2 ? 3.3 : -3.2
+						),
+						new THREE.Vector3( 0, -1, 0 ),
+						new THREE.Vector3( -1, 0, 0 ),
+						0.5,
+						0.7,
+						i < 2 ? false : true
+					);
+				}
+
+				input = {
+					power: null,
+					direction: null,
+					steering: 0
+				};
+				document.addEventListener('keydown', function( ev ) {
+					switch ( ev.keyCode ) {
+						case 37: // left
+							input.direction = 1;
+							break;
+
+						case 38: // forward
+							input.power = true;
+							break;
+
+						case 39: // right
+							input.direction = -1;
+							break;
+
+						case 40: // back
+							input.power = false;
+							break;
+					}
+				});
+				document.addEventListener('keyup', function( ev ) {
+					switch ( ev.keyCode ) {
+						case 37: // left
+							input.direction = null;
+							break;
+
+						case 38: // forward
+							input.power = null;
+							break;
+
+						case 39: // right
+							input.direction = null;
+							break;
+
+						case 40: // back
+							input.power = null;
+							break;
+					}
+				});
 
 			}
 
