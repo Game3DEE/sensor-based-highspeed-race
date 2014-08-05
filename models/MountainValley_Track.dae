@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.68.0 r58537</authoring_tool>
     </contributor>
-    <created>2014-07-23T22:23:00</created>
-    <modified>2014-07-23T22:23:00</modified>
+    <created>2014-08-01T19:16:42</created>
+    <modified>2014-08-01T19:16:42</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -24,74 +24,6 @@
       </optics>
     </camera>
   </library_cameras>
-  <library_lights>
-    <light id="Lamp-light" name="Spot">
-      <technique_common>
-        <ambient>
-          <color>0.8 0.8 0.8</color>
-        </ambient>
-      </technique_common>
-      <extra>
-        <technique profile="blender">
-          <adapt_thresh>0.000999987</adapt_thresh>
-          <area_shape>0</area_shape>
-          <area_size>1</area_size>
-          <area_sizey>1</area_sizey>
-          <area_sizez>1</area_sizez>
-          <atm_distance_factor>1</atm_distance_factor>
-          <atm_extinction_factor>1</atm_extinction_factor>
-          <atm_turbidity>2</atm_turbidity>
-          <att1>0</att1>
-          <att2>1</att2>
-          <backscattered_light>1</backscattered_light>
-          <bias>1</bias>
-          <blue>1</blue>
-          <buffers>1</buffers>
-          <bufflag>0</bufflag>
-          <bufsize>2880</bufsize>
-          <buftype>0</buftype>
-          <clipend>30.002</clipend>
-          <clipsta>1.000799</clipsta>
-          <compressthresh>0.04999995</compressthresh>
-          <dist sid="blender_dist">29.99998</dist>
-          <energy sid="blender_energy">0.8</energy>
-          <falloff_type>1</falloff_type>
-          <filtertype>0</filtertype>
-          <flag>0</flag>
-          <gamma sid="blender_gamma">1</gamma>
-          <green>1</green>
-          <halo_intensity sid="blnder_halo_intensity">1</halo_intensity>
-          <horizon_brightness>1</horizon_brightness>
-          <mode>8192</mode>
-          <ray_samp>1</ray_samp>
-          <ray_samp_method>1</ray_samp_method>
-          <ray_samp_type>0</ray_samp_type>
-          <ray_sampy>1</ray_sampy>
-          <ray_sampz>1</ray_sampz>
-          <red>1</red>
-          <samp>3</samp>
-          <shadhalostep>0</shadhalostep>
-          <shadow_b sid="blender_shadow_b">0</shadow_b>
-          <shadow_g sid="blender_shadow_g">0</shadow_g>
-          <shadow_r sid="blender_shadow_r">0</shadow_r>
-          <shadspotsize>45</shadspotsize>
-          <sky_colorspace>0</sky_colorspace>
-          <sky_exposure>1</sky_exposure>
-          <skyblendfac>1</skyblendfac>
-          <skyblendtype>1</skyblendtype>
-          <soft>3</soft>
-          <spotblend>0.15</spotblend>
-          <spotsize>75</spotsize>
-          <spread>1</spread>
-          <sun_brightness>1</sun_brightness>
-          <sun_effect_type>0</sun_effect_type>
-          <sun_intensity>1</sun_intensity>
-          <sun_size>1</sun_size>
-          <type>3</type>
-        </technique>
-      </extra>
-    </light>
-  </library_lights>
   <library_images>
     <image id="Tar_Cracked_png" name="Tar_Cracked_png">
       <init_from>Tar_Cracked.png</init_from>
@@ -107,9 +39,6 @@
     </image>
     <image id="SandDesert_StartTower" name="SandDesert_StartTower">
       <init_from>SandDesert_StartTower.png</init_from>
-    </image>
-    <image id="SkyBox-Mountain_png" name="SkyBox-Mountain_png">
-      <init_from>SkyBox-Mountain.png</init_from>
     </image>
   </library_images>
   <library_effects>
@@ -293,42 +222,6 @@
       </profile_COMMON>
       <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
     </effect>
-    <effect id="Sky-effect">
-      <profile_COMMON>
-        <newparam sid="SkyBox-Mountain_png-surface">
-          <surface type="2D">
-            <init_from>SkyBox-Mountain_png</init_from>
-          </surface>
-        </newparam>
-        <newparam sid="SkyBox-Mountain_png-sampler">
-          <sampler2D>
-            <source>SkyBox-Mountain_png-surface</source>
-          </sampler2D>
-        </newparam>
-        <technique sid="common">
-          <phong>
-            <emission>
-              <color sid="emission">0 0 0 1</color>
-            </emission>
-            <ambient>
-              <color sid="ambient">0.1 0.1 0.1 1</color>
-            </ambient>
-            <diffuse>
-              <texture texture="SkyBox-Mountain_png-sampler" texcoord="skybox"/>
-            </diffuse>
-            <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
-            </specular>
-            <shininess>
-              <float sid="shininess">50</float>
-            </shininess>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
-          </phong>
-        </technique>
-      </profile_COMMON>
-    </effect>
   </library_effects>
   <library_materials>
     <material id="Road-material" name="Road">
@@ -345,9 +238,6 @@
     </material>
     <material id="Tower-material" name="Tower">
       <instance_effect url="#Tower-effect"/>
-    </material>
-    <material id="Sky-material" name="Sky">
-      <instance_effect url="#Sky-effect"/>
     </material>
   </library_materials>
   <library_geometries>
@@ -460,50 +350,6 @@
       </mesh>
       <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
     </geometry>
-    <geometry id="SkyBox-mesh" name="SkyBox">
-      <mesh>
-        <source id="SkyBox-mesh-positions">
-          <float_array id="SkyBox-mesh-positions-array" count="24">2400.001 2399.999 2154.29 2399.999 -2400.001 2154.29 -2400.001 -2399.999 2154.29 -2400 2400 2154.29 2399.999 -2400.001 -245.71 2400.001 2400 -245.71 -2400 -2399.999 -245.71 -2399.999 2400 -245.71</float_array>
-          <technique_common>
-            <accessor source="#SkyBox-mesh-positions-array" count="8" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="SkyBox-mesh-normals">
-          <float_array id="SkyBox-mesh-normals-array" count="30">0 0 -1 -1 5.08626e-7 0 3.05176e-7 1 0 1 -2.54313e-7 0 -2.03451e-7 -1 -2.03451e-7 0 0 -1 -1 3.05176e-7 -3.05176e-7 5.08626e-7 1 3.05176e-7 1 -2.54313e-7 0 -2.0345e-7 -1 -2.03451e-7</float_array>
-          <technique_common>
-            <accessor source="#SkyBox-mesh-normals-array" count="10" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="SkyBox-mesh-map-0">
-          <float_array id="SkyBox-mesh-map-0-array" count="60">0.7519047 0.7519105 0.2487234 0.7505593 0.7505934 0.2494658 0.7519047 0.7519105 0.7519049 0.9979999 0.2487234 0.7505593 0.002000033 0.2511532 0.249369 0.2511531 0.002000272 0.7505595 0.7505932 0.002000033 0.7505934 0.2494658 0.2493689 0.002000272 0.998 0.7519102 0.7519047 0.7519105 0.9979997 0.2494657 0.2487234 0.7505593 0.249369 0.2511531 0.7505934 0.2494658 0.7519049 0.9979999 0.2487236 0.998 0.2487234 0.7505593 0.249369 0.2511531 0.2487234 0.7505593 0.002000272 0.7505595 0.7505934 0.2494658 0.249369 0.2511531 0.2493689 0.002000272 0.7519047 0.7519105 0.7505934 0.2494658 0.9979997 0.2494657</float_array>
-          <technique_common>
-            <accessor source="#SkyBox-mesh-map-0-array" count="30" stride="2">
-              <param name="S" type="float"/>
-              <param name="T" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="SkyBox-mesh-vertices">
-          <input semantic="POSITION" source="#SkyBox-mesh-positions"/>
-        </vertices>
-        <polylist material="Sky-material" count="10">
-          <input semantic="VERTEX" source="#SkyBox-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#SkyBox-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#SkyBox-mesh-map-0" offset="2" set="0"/>
-          <vcount>3 3 3 3 3 3 3 3 3 3 </vcount>
-          <p>0 0 0 1 0 1 3 0 2 0 1 3 5 1 4 1 1 5 6 2 6 2 2 7 4 2 8 7 3 9 3 3 10 6 3 11 5 4 12 0 4 13 7 4 14 1 5 15 2 5 16 3 5 17 5 6 18 4 6 19 1 6 20 2 7 21 1 7 22 4 7 23 3 8 24 2 8 25 6 8 26 0 9 27 3 9 28 7 9 29</p>
-        </polylist>
-      </mesh>
-      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
-    </geometry>
   </library_geometries>
   <library_controllers/>
   <library_visual_scenes>
@@ -540,22 +386,6 @@
             <technique_common>
               <instance_material symbol="Tower-material" target="#Tower-material">
                 <bind_vertex_input semantic="Tower_UV" input_semantic="TEXCOORD" input_set="0"/>
-              </instance_material>
-            </technique_common>
-          </bind_material>
-        </instance_geometry>
-      </node>
-      <node id="Lamp" name="Lamp" type="NODE">
-        <matrix sid="transform">1 0 0 -19.98545 0 1 0 -7.275307 0 0 1 47.91223 0 0 0 1</matrix>
-        <instance_light url="#Lamp-light"/>
-      </node>
-      <node id="SkyBox-Mountains" name="SkyBox-Mountains" type="NODE">
-        <matrix sid="transform">1 0 0 -0.05339383 0 1 0 0 0 0 1 53.85369 0 0 0 1</matrix>
-        <instance_geometry url="#SkyBox-mesh">
-          <bind_material>
-            <technique_common>
-              <instance_material symbol="Sky-material" target="#Sky-material">
-                <bind_vertex_input semantic="skybox" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>
           </bind_material>
