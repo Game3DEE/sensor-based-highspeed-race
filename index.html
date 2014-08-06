@@ -199,7 +199,7 @@ function init() {
 
 				// CUBE CAMERA
 
-				cubeCamera = new THREE.CubeCamera( 1, 100000, 128 );
+				cubeCamera = new THREE.CubeCamera( 1, 100, 128 );
 				scene.add( cubeCamera );
 
 				// MATERIALS
@@ -244,7 +244,7 @@ function init() {
 
 				veyron = new THREE.Car();
 
-				veyron.modelScale = 2;
+				veyron.modelScale = 0.02;
 				veyron.backWheelOffset = 2;
 
 				veyron.callback = function( object ) {
@@ -382,7 +382,7 @@ function init() {
 	 
  
 	var light = new THREE.PointLight(0xfffff3, 0.7);
-	light.position.set(25,5000,25);
+	light.position.set(25,100,25);
 	scene.add(light);
 	 
 	var loader = new THREE.ColladaLoader();
@@ -394,7 +394,7 @@ function init() {
 	var dae = collada.scene;
 	var skin = collada.skins[ 0 ];
 	dae.position.set(0,0,0);//x,z,y- if you think in blender dimensions ;)
-	dae.scale.set(35,35,35);
+	dae.scale.set(2,2,2);
 	scene.add(dae);	
 	var axes = new THREE.AxisHelper(50);
 	axes.position = dae.position;
@@ -550,7 +550,7 @@ function init() {
 
 					object.root.add( camera );
 
-					camera.position.set( 0, 0, 0 );
+					camera.position.set( 5000, 5000, 5000 );
 					//camera.position.set( 0, 3000, -500 );
 
 					cameraTarget.z = 500;
