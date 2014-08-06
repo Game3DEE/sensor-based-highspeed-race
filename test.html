@@ -57,8 +57,7 @@
 					if ( input.power === true ) {
 						vehicle.applyEngineForce( 1000 );
 					} else if ( input.power === false ) {
-						vehicle.setBrake( 20, 2 );
-						vehicle.setBrake( 20, 3 );
+						vehicle.applyEngineForce( -1000 );
 					} else {
 						vehicle.applyEngineForce( 0 );
 					}
@@ -71,7 +70,7 @@
 			35,
 			window.innerWidth / window.innerHeight,
 			1,
-			500
+			5000
 		);
 		scene.add( camera );
 
@@ -95,13 +94,13 @@
 		// Ground
 		ground_material = Physijs.createMaterial(
 			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'models/Grass_256.png' ) }),
-			10, // high friction
-			10 // low restitution
+			1, // high friction
+			1 // low restitution
 		);
 		ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-		ground_material.map.repeat.set( 3, 3 );
+		ground_material.map.repeat.set( 100, 100 );
 
-		var ground_geometry = new THREE.PlaneGeometry( 300, 300, 100, 100 );
+		var ground_geometry = new THREE.PlaneGeometry( 5000, 5000, 5000 );
 		ground_geometry.computeFaceNormals();
 		ground_geometry.computeVertexNormals();
 
@@ -114,7 +113,8 @@
 		);
 		ground.rotation.x = -Math.PI / 2;
 		ground.receiveShadow = true;
-		scene.add( ground );	
+		ground.position.set(0, -1, 0);
+		scene.add( ground );
 
 		
 		// Strecke
@@ -122,17 +122,18 @@
 		light.position.set(25,5000,25);
 		scene.add(light);
 		
-		var loader = new THREE.ColladaLoader();
+		var loader = new THREE.JSONLoader();
 		 
-		loader.options.convertUpAxis = true;
-		 
-		loader.load( 'models/MountainValley_Track.dae', function ( collada ) {
-			//dummy1.dae
-			var dae = collada.scene;
-			var skin = collada.skins[ 0 ];
-			dae.position.set(0,0,0);//x,z,y- if you think in blender dimensions ;)
-			dae.scale.set(1,1,1);
-			scene.add(dae);	
+		loader.load( 'models/MountainValley_Track.js', function ( track, track_materials ) {
+			var mesh = new THREE.Mesh(
+				track,
+			   Physijs.createMaterial(
+					new THREE.MeshFaceMaterial( track_materials),
+					1.0, // friction
+					1.0 // restitution
+					),0 //mass
+			);	
+			scene.add(mesh);	
 		});
 		
 		// Car
@@ -276,7 +277,7 @@
     render = function() {
 		requestAnimationFrame( render );
 		if ( vehicle ) {
-			camera.position.copy( vehicle.mesh.position ).add( new THREE.Vector3( 20, 15, 20 ) );
+			camera.position.copy( vehicle.mesh.position ).add( new THREE.Vector3( 20, 15, -50 ) );
 			camera.lookAt( vehicle.mesh.position );
 		}
 		renderer.render( scene, camera); // render the scene
