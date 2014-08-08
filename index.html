@@ -29,11 +29,18 @@
 		"veyron"	: { r: 0.5,	 model: null, backCam: new THREE.Vector3( 550, 100, -1000 ) }
 	};
 	
-	var vehicle_body, vehicle, camera, projector;
+	var vehicle_body, vehicle, camera, projector, light;
+	
+	var effectDirt, effectBloom, effectKeep, effectBlend, effectFXAA;
+	
+	var SCREEN_WIDTH = window.innerWidth;
+	var SCREEN_HEIGHT = window.innerHeight;
 
     initScene = function() {
 		projector = new THREE.Projector;
         renderer = new THREE.WebGLRenderer({ antialias: true });
+		renderer.shadowMapEnabled = true;
+		renderer.shadowMapSoft = true;
         renderer.setSize( window.innerWidth, window.innerHeight );
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
 
@@ -116,23 +123,36 @@
 		ground.position.set(0, -1, 0);
 		scene.add( ground );
 
+		// Light
+		light = new THREE.DirectionalLight( 0xFFFFFF );
+		light.position.set( 20, 20, -15 );
+		light.target.position.copy( scene.position );
+		light.castShadow = true;
+		light.shadowCameraLeft = -150;
+		light.shadowCameraTop = -150;
+		light.shadowCameraRight = 150;
+		light.shadowCameraBottom = 150;
+		light.shadowCameraNear = 20;
+		light.shadowCameraFar = 400;
+		light.shadowBias = -.0001
+		light.shadowMapWidth = light.shadowMapHeight = 2048;
+		light.shadowDarkness = .7;
+		scene.add( light );
 		
 		// Strecke
-		var light = new THREE.PointLight(0xfffff3, 0.7);
-		light.position.set(25,5000,25);
-		scene.add(light);
 		
 		var loader = new THREE.JSONLoader();
 		 
-		loader.load( 'models/MountainValley_Track.js', function ( track, track_materials ) {
-			var mesh = new THREE.Mesh(
+		loader.load( 'models/MountainTrack/MountainValley_Track.js', function ( track, track_materials ) {
+			var mesh = new Physijs.ConcaveMesh(
 				track,
 			   Physijs.createMaterial(
-					new THREE.MeshFaceMaterial( track_materials),
+					new THREE.MeshFaceMaterial( track_materials ),
 					1.0, // friction
 					1.0 // restitution
 					),0 //mass
-			);	
+			);
+			mesh.receiveShadow = true;
 			scene.add(mesh);	
 		});
 		
@@ -146,52 +166,58 @@
 		flareB = THREE.ImageUtils.loadTexture( "textures/lensflare0.png" );
 		
 		// MATERIALS
-		var cubeTarget = cubeCamera.renderTarget;
+				var r = "textures/Bridge2/";
+				var urls = [ r + "posx.jpg", r + "negx.jpg",
+							 r + "posy.jpg", r + "negy.jpg",
+							 r + "posz.jpg", r + "negz.jpg" ];
+
+				var textureCube = THREE.ImageUtils.loadTextureCube( urls );
+				textureCube.format = THREE.RGBFormat;
 		mlib = {
 
-			body: [],
+			"Chrome": 	new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: textureCube } ),
 
-			"Chrome": new THREE.MeshLambertMaterial( { color: 0xffffff, ambient: 0xffffff, envMap: cubeTarget  } ),
+			"Dark chrome":	new THREE.MeshLambertMaterial( { color: 0x444444, envMap: textureCube } ),
 
-			"Dark chrome": new THREE.MeshLambertMaterial( { color: 0x444444, ambient: 0x444444, envMap: cubeTarget } ),
+			"Black rough":		new THREE.MeshLambertMaterial( { color: 0x050505 } ),
 
-			"Black rough": new THREE.MeshLambertMaterial( { color: 0x050505, ambient: 0x050505 } ),
+			"Dark glass":	new THREE.MeshLambertMaterial( { color: 0x101046, envMap: textureCube, opacity: 0.25, transparent: true } ),
+			"Orange glass":	new THREE.MeshLambertMaterial( { color: 0x995500, opacity: 0.75, transparent: true } ),
+			"Red glass":	new THREE.MeshLambertMaterial( { color: 0xff0000, opacity: 0.75, transparent: true } ),
 
-			"Dark glass": new THREE.MeshLambertMaterial( { color: 0x101020, ambient: 0x101020, envMap: cubeTarget, opacity: 0.5, transparent: true } ),
-			"Orange glass": new THREE.MeshLambertMaterial( { color: 0xffbb00, ambient: 0xffbb00, opacity: 0.5, transparent: true } ),
-			"Red glass": new THREE.MeshLambertMaterial( { color: 0xff0000, ambient: 0xff0000, opacity: 0.5, transparent: true } ),
-
-			"Black metal": new THREE.MeshLambertMaterial( { color: 0x222222, ambient: 0x222222, envMap: cubeTarget, combine: THREE.MultiplyOperation } ),
-			"Orange metal": new THREE.MeshLambertMaterial( { color: 0xff6600, ambient: 0xff6600, envMap: cubeTarget, combine: THREE.MultiplyOperation } )
+			"Black metal":	new THREE.MeshLambertMaterial( { color: 0x222222, envMap: textureCube, combine: THREE.MultiplyOperation } ),
+			"Orange metal": new THREE.MeshLambertMaterial( { color: 0xff6600, ambient: 0xff2200, envMap: textureCube, combine: THREE.MultiplyOperation } )
 
 		}
-		
-		mlib.body.push( [ "Orange", new THREE.MeshLambertMaterial( { color: 0x883300, ambient: 0x883300, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.1 } ) ] );
-		mlib.body.push( [ "Blue", new THREE.MeshLambertMaterial( { color: 0x113355, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.1 } ) ] );
-		mlib.body.push( [ "Red", new THREE.MeshLambertMaterial( { color: 0x660000, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.1 } ) ] );
-		mlib.body.push( [ "Black", new THREE.MeshLambertMaterial( { color: 0x000000, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.2 } ) ] );
-		mlib.body.push( [ "White", new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.2 } ) ] );
-
-		mlib.body.push( [ "Carmine", new THREE.MeshPhongMaterial( { color: 0x770000, specular: 0xffaaaa, envMap: cubeTarget, combine: THREE.MultiplyOperation } ) ] );
-		mlib.body.push( [ "Gold", new THREE.MeshPhongMaterial( { color: 0xaa9944, specular: 0xbbaa99, shininess: 50, envMap: cubeTarget, combine: THREE.MultiplyOperation } ) ] );
-		mlib.body.push( [ "Bronze", new THREE.MeshPhongMaterial( { color: 0x150505, specular: 0xee6600, shininess: 10, envMap: cubeTarget, combine: THREE.MixOperation, reflectivity: 0.2 } ) ] );
-		mlib.body.push( [ "Chrome", new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0xffffff, envMap: cubeTarget, combine: THREE.MultiplyOperation } ) ] );
 
 		var jsloader = new THREE.JSONLoader();	  
 		var loader = new THREE.BinaryLoader();
 
 		loader.load( "models/veyron/parts/veyron_body_bin.js", function( car, car_materials ) {
 			jsloader.load( "models/mustang_wheel.js", function( wheel, wheel_materials ) {
-			for(var i = 0; i < car.vertices.length; i++) {
-				car.vertices[i].x *= .04;
-				car.vertices[i].y *= .04;
-				car.vertices[i].z *= .04;
-			}
+				for(var i = 0; i < car.vertices.length; i++) {
+					car.vertices[i].x *= .04;
+					car.vertices[i].y *= .04;
+					car.vertices[i].z *= .04;
+				}
+				
+				car_materials[ 0 ] = mlib[ "Black metal" ];	// top, front center, back sides
+				car_materials[ 1 ] = mlib[ "Chrome" ];			// front sides
+				car_materials[ 2 ] = mlib[ "Chrome" ];			// engine
+				car_materials[ 3 ] = mlib[ "Dark chrome" ];	// small chrome things
+				car_materials[ 4 ] = mlib[ "Red glass" ];		// backlights
+				car_materials[ 5 ] = mlib[ "Orange glass" ];	// back signals
+				car_materials[ 6 ] = mlib[ "Black rough" ];	// bottom, interior
+				car_materials[ 7 ] = mlib[ "Dark glass" ];		// windshield
+				wheel_materials[ 0 ] = mlib[ "Chrome" ];			// insides
+				wheel_materials[ 1 ] = mlib[ "Chrome" ];	// tire				
 				var mesh = new Physijs.BoxMesh(
 					car,
 					new THREE.MeshFaceMaterial( car_materials )
-				);	
+				);
+				vehicle_body = mesh;
 				mesh.position.y = 6;
+				mesh.position.x = -30;
 				mesh.castShadow = mesh.receiveShadow = true;
 
 				vehicle = new Physijs.Vehicle(mesh, new Physijs.VehicleTuning(
@@ -211,12 +237,12 @@
 						new THREE.Vector3(					//connection_point
 								i % 2 === 0 ? -2.5 : 2.5,
 								-1,
-								i < 2 ? 3.3 : -3.2
+								i < 2 ? 3.0 : -3.1
 						),
 						new THREE.Vector3( 0, -1, 0 ),		//wheel_direction
 						new THREE.Vector3( -1, 0, 0 ),		//wheel_axle
-						-1,									//suspension_rest_length
-						2,								//wheel_radius
+						.5,									//suspension_rest_length
+						.7,								//wheel_radius
 						i < 2 ? false : true				//is_front_wheel
 					);
 				}
@@ -267,7 +293,7 @@
 			});
 			
 		});
-		
+ 		
 		//controls
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
         requestAnimationFrame( render );
@@ -279,6 +305,8 @@
 		if ( vehicle ) {
 			camera.position.copy( vehicle.mesh.position ).add( new THREE.Vector3( 20, 15, -50 ) );
 			camera.lookAt( vehicle.mesh.position );
+			light.target.position.copy( vehicle.mesh.position );
+			light.position.addVectors( light.target.position, new THREE.Vector3( 20, 20, -15 ) );
 		}
 		renderer.render( scene, camera); // render the scene
 	};
