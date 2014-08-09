@@ -25,9 +25,6 @@
     Physijs.scripts.ammo = '/js/ammo.js';
 
     var initScene, render, renderer, scene, box, mlib, vehicle;
-	var config = {
-		"veyron"	: { r: 0.5,	 model: null, backCam: new THREE.Vector3( 550, 100, -1000 ) }
-	};
 	
 	var camera, light;
 	
@@ -69,7 +66,7 @@
 
 		// Ground
 		ground_material = Physijs.createMaterial(
-			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'models/Grass_256.png' ) }),
+			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'models/tracks/MountainTrack/Grass_256.png' ) }),
 			1, // high friction
 			1 // low restitution
 		);
@@ -112,7 +109,7 @@
 		
 		var loader = new THREE.JSONLoader();
 		 
-		loader.load( 'models/MountainTrack/MountainValley_Track.js', function ( track, track_materials ) {
+		loader.load( 'models/tracks/MountainTrack/MountainValley_Track.js', function ( track, track_materials ) {
 			var mesh = new Physijs.ConcaveMesh(
 				track,
 			   Physijs.createMaterial(
