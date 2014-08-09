@@ -11,7 +11,7 @@
 <script src="js/ColladaLoader.js"></script>
 
 <script src="js/BinaryLoader.js"></script>
-<script src="js/Car.js"></script>
+<script src="js/Cars.js"></script>
 <script src="js/Detector.js"></script>
 <script src="js/stats.min.js"></script>
 
@@ -24,20 +24,17 @@
     Physijs.scripts.worker = '/js/physijs_worker.js';
     Physijs.scripts.ammo = '/js/ammo.js';
 
-    var initScene, render, renderer, scene, box, veyron, mlib;
+    var initScene, render, renderer, scene, box, mlib, vehicle;
 	var config = {
 		"veyron"	: { r: 0.5,	 model: null, backCam: new THREE.Vector3( 550, 100, -1000 ) }
 	};
 	
-	var vehicle_body, vehicle, camera, projector, light;
-	
-	var effectDirt, effectBloom, effectKeep, effectBlend, effectFXAA;
+	var camera, light;
 	
 	var SCREEN_WIDTH = window.innerWidth;
 	var SCREEN_HEIGHT = window.innerHeight;
 
     initScene = function() {
-		projector = new THREE.Projector;
         renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.shadowMapEnabled = true;
 		renderer.shadowMapSoft = true;
@@ -46,33 +43,7 @@
 
 		scene = new Physijs.Scene;
 		scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
-		scene.addEventListener(
-			'update',
-			function() {
-
-				if ( input && vehicle ) {
-					if ( input.direction !== null ) {
-						input.steering += input.direction / 50;
-						if ( input.steering < -.6 ) 
-							input.steering = -.6;
-						if ( input.steering > .6 ) 
-							input.steering = .6;
-					}
-					vehicle.setSteering( input.steering, 0 );
-					vehicle.setSteering( input.steering, 1 );
-
-					if ( input.power === true ) {
-						vehicle.applyEngineForce( 1000 );
-					} else if ( input.power === false ) {
-						vehicle.applyEngineForce( -1000 );
-					} else {
-						vehicle.applyEngineForce( 0 );
-					}
-				}
-
-				scene.simulate( undefined, 2 );
-			}
-		);	
+		
 		camera = new THREE.PerspectiveCamera(
 			35,
 			window.innerWidth / window.innerHeight,
@@ -95,8 +66,6 @@
 		var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
 		var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
 		scene.add( skyBox );
-		
-		var input;
 
 		// Ground
 		ground_material = Physijs.createMaterial(
@@ -157,143 +126,14 @@
 		});
 		
 		// Car
-		cubeCamera = new THREE.CubeCamera( 1, 100, 128 );
-		scene.add( cubeCamera );	
-
 		// FLARES
 
 		flareA = THREE.ImageUtils.loadTexture( "textures/lensflare2.jpg" );
 		flareB = THREE.ImageUtils.loadTexture( "textures/lensflare0.png" );
 		
 		// MATERIALS
-				var r = "textures/Bridge2/";
-				var urls = [ r + "posx.jpg", r + "negx.jpg",
-							 r + "posy.jpg", r + "negy.jpg",
-							 r + "posz.jpg", r + "negz.jpg" ];
 
-				var textureCube = THREE.ImageUtils.loadTextureCube( urls );
-				textureCube.format = THREE.RGBFormat;
-		mlib = {
-
-			"Chrome": 	new THREE.MeshLambertMaterial( { color: 0xffffff, envMap: textureCube } ),
-
-			"Dark chrome":	new THREE.MeshLambertMaterial( { color: 0x444444, envMap: textureCube } ),
-
-			"Black rough":		new THREE.MeshLambertMaterial( { color: 0x050505 } ),
-
-			"Dark glass":	new THREE.MeshLambertMaterial( { color: 0x101046, envMap: textureCube, opacity: 0.25, transparent: true } ),
-			"Orange glass":	new THREE.MeshLambertMaterial( { color: 0x995500, opacity: 0.75, transparent: true } ),
-			"Red glass":	new THREE.MeshLambertMaterial( { color: 0xff0000, opacity: 0.75, transparent: true } ),
-
-			"Black metal":	new THREE.MeshLambertMaterial( { color: 0x222222, envMap: textureCube, combine: THREE.MultiplyOperation } ),
-			"Orange metal": new THREE.MeshLambertMaterial( { color: 0xff6600, ambient: 0xff2200, envMap: textureCube, combine: THREE.MultiplyOperation } )
-
-		}
-
-		var jsloader = new THREE.JSONLoader();	  
-		var loader = new THREE.BinaryLoader();
-
-		loader.load( "models/veyron/parts/veyron_body_bin.js", function( car, car_materials ) {
-			jsloader.load( "models/mustang_wheel.js", function( wheel, wheel_materials ) {
-				for(var i = 0; i < car.vertices.length; i++) {
-					car.vertices[i].x *= .04;
-					car.vertices[i].y *= .04;
-					car.vertices[i].z *= .04;
-				}
-				
-				car_materials[ 0 ] = mlib[ "Black metal" ];	// top, front center, back sides
-				car_materials[ 1 ] = mlib[ "Chrome" ];			// front sides
-				car_materials[ 2 ] = mlib[ "Chrome" ];			// engine
-				car_materials[ 3 ] = mlib[ "Dark chrome" ];	// small chrome things
-				car_materials[ 4 ] = mlib[ "Red glass" ];		// backlights
-				car_materials[ 5 ] = mlib[ "Orange glass" ];	// back signals
-				car_materials[ 6 ] = mlib[ "Black rough" ];	// bottom, interior
-				car_materials[ 7 ] = mlib[ "Dark glass" ];		// windshield
-				wheel_materials[ 0 ] = mlib[ "Chrome" ];			// insides
-				wheel_materials[ 1 ] = mlib[ "Chrome" ];	// tire				
-				var mesh = new Physijs.BoxMesh(
-					car,
-					new THREE.MeshFaceMaterial( car_materials )
-				);
-				vehicle_body = mesh;
-				mesh.position.y = 6;
-				mesh.position.x = -30;
-				mesh.castShadow = mesh.receiveShadow = true;
-
-				vehicle = new Physijs.Vehicle(mesh, new Physijs.VehicleTuning(
-					10.88,
-					1.83,
-					0.28,
-					500,
-					10.5,
-					6000
-				));
-				scene.add( vehicle );
-				var wheel_material = new THREE.MeshFaceMaterial( wheel_materials );
-				for ( var i = 0; i < 4; i++ ) {
-					vehicle.addWheel(
-						wheel,								//wheel_geometry
-						wheel_material,						//wheel_material
-						new THREE.Vector3(					//connection_point
-								i % 2 === 0 ? -2.5 : 2.5,
-								-1,
-								i < 2 ? 3.0 : -3.1
-						),
-						new THREE.Vector3( 0, -1, 0 ),		//wheel_direction
-						new THREE.Vector3( -1, 0, 0 ),		//wheel_axle
-						.5,									//suspension_rest_length
-						.7,								//wheel_radius
-						i < 2 ? false : true				//is_front_wheel
-					);
-				}
-
-				input = {
-					power: null,
-					direction: null,
-					steering: 0
-				};
-				document.addEventListener('keydown', function( ev ) {
-					switch ( ev.keyCode ) {
-						case 37: // left
-							input.direction = 1;
-							break;
-
-						case 38: // forward
-							input.power = true;
-							break;
-
-						case 39: // right
-							input.direction = -1;
-							break;
-
-						case 40: // back
-							input.power = false;
-							break;
-					}
-				});
-				document.addEventListener('keyup', function( ev ) {
-					switch ( ev.keyCode ) {
-						case 37: // left
-							input.direction = null;
-							break;
-
-						case 38: // forward
-							input.power = null;
-							break;
-
-						case 39: // right
-							input.direction = null;
-							break;
-
-						case 40: // back
-							input.power = null;
-							break;
-					}
-				});		
-			});
-			
-		});
- 		
+		var selectedCar = new Cars("gallardo");
 		//controls
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
         requestAnimationFrame( render );
@@ -310,86 +150,6 @@
 		}
 		renderer.render( scene, camera); // render the scene
 	};
-
-	
-	function addCar( object, x, y, z ) {
-
-		object.root.position.set( x, y, z );
-		object.root.position.set( x, y, z );
-		
-		
-		var mesh = new Physijs.BoxMesh(
-			object.bodyMesh.geometry,
-			new THREE.MeshFaceMaterial( object.bodyMaterials )
-		);
-		mesh.scale.set(.02,.02,.02)
-		mesh.position.y = 10;
-		mesh.castShadow = mesh.receiveShadow = true;
-
-		vehicle = new Physijs.Vehicle(mesh, new Physijs.VehicleTuning(
-			10.88,
-			1.83,
-			0.28,
-			500,
-			10.5,
-			6000
-		));
-		
-		scene.add( vehicle );
-		
-		var wheel_material = new THREE.MeshFaceMaterial( object.wheelMaterials );
-		
-		for ( var i = 0; i < 4; i++ ) {
-			vehicle.addWheel(
-				object.wheelGeometry,
-				wheel_material,
-				new THREE.Vector3(
-						i % 2 === 0 ? -1.0 : 1.0,
-						0,
-						i < 2 ? 2 : -2
-				),
-				new THREE.Vector3( 0, -1, 0 ),
-				new THREE.Vector3( -1, 0, 0 ),
-				0.5,
-				0.7,
-				i < 2 ? false : true
-			);
-		}
-
-	}
-
-	function setMaterialsVeyron( car ) {
-
-		// 0 - top, front center, back sides
-		// 1 - front sides
-		// 2 - engine
-		// 3 - small chrome things
-		// 4 - backlights
-		// 5 - back signals
-		// 6 - bottom, interior
-		// 7 - windshield
-
-		// BODY
-
-		var materials = car.bodyMaterials;
-
-		materials[ 0 ] = mlib[ "Black metal" ];	// top, front center, back sides
-		materials[ 1 ] = mlib[ "Chrome" ];			// front sides
-		materials[ 2 ] = mlib[ "Chrome" ];			// engine
-		materials[ 3 ] = mlib[ "Dark chrome" ];	// small chrome things
-		materials[ 4 ] = mlib[ "Red glass" ];		// backlights
-		materials[ 5 ] = mlib[ "Orange glass" ];	// back signals
-		materials[ 6 ] = mlib[ "Black rough" ];	// bottom, interior
-		materials[ 7 ] = mlib[ "Dark glass" ];		// windshield
-
-		// WHEELS
-
-		materials = car.wheelMaterials;
-
-		materials[ 0 ] = mlib[ "Chrome" ];			// insides
-		materials[ 1 ] = mlib[ "Black rough" ];	// tire
-
-	}
 	
     window.onload = initScene;
 
