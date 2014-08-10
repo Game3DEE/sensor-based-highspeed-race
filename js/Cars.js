@@ -8,8 +8,6 @@ function Cars(selectedCar) {
 		direction: null,
 		steering: 0
 	};
-	var speed = 0;
-	var max_speed = 100;
 	var r = "textures/Bridge2/";
 	var urls = [ r + "posx.jpg", r + "negx.jpg",
 				 r + "posy.jpg", r + "negy.jpg",
@@ -130,9 +128,9 @@ function Cars(selectedCar) {
 					500,
 					10.5,
 					6000
-				));	
+				));
 				scene.add( vehicle );
-				
+				vehicle.mesh.add(camera);
 				addMaterials(0,wheel_materials);
 				var wheel_material = new THREE.MeshFaceMaterial( wheel_materials );			
 				for ( var i = 0; i < 4; i++ ) {
@@ -183,7 +181,7 @@ function Cars(selectedCar) {
 				}
 			}else if(selectedCar == "mustang"){
 				if(car_materials) {
-					car_materials[ 0 ] = mlib[ "Black rough" ]; 		//Windows
+					car_materials[ 0 ] = mlib[ "Dark glass" ]; 		//Windows
 					car_materials[ 1 ] = mlib[ "Chrome" ]; 				//Kühlergrill
 					car_materials[ 2 ] = mlib[ "Red" ];					//Lights, Auspuff	
 					car_materials[ 3 ] = mlib[  "Black rough"  ];		//Bottom

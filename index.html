@@ -24,7 +24,9 @@
 <script type="text/javascript" src="js/speedometer/example.js"></script>
 <script type="text/javascript" src="js/speedometer/tbe.js"></script>
 <script type="text/javascript" src="js/speedometer/xcanvas.js"></script>
-<link rel="stylesheet" type="text/css" href="css/speedometer.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />
+
+<script type="text/javascript" src="js/jquery.js"></script>
 
 <script type="text/javascript">
 	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
@@ -40,14 +42,20 @@
 	});
     Physijs.scripts.worker = 'js/physijs_worker.js';
     Physijs.scripts.ammo = 'ammo.js';
-
-    var initScene, render, renderer, scene, box, mlib, vehicle;
+	var speed = 0;
+	var max_speed = 100;
+    var initScene, render, renderer, scene, box, mlib, radarCamera, selectedCar;
+	var vehicle, raceTrack, cameraTarget;
+	var $trackingOverlay = $('#tracking-overlay');
 	
 	var camera, light;
+	var projector;
 	
 	var SCREEN_WIDTH = window.innerWidth;
 	var SCREEN_HEIGHT = window.innerHeight;
     initScene = function() {
+		cameraTarget = new THREE.Vector3();
+		projector = new THREE.Projector();
         renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.shadowMapEnabled = true;
 		renderer.shadowMapSoft = true;
@@ -56,17 +64,23 @@
 
 		scene = new Physijs.Scene;
 		scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
-		
 		camera = new THREE.PerspectiveCamera(
 			35,
 			window.innerWidth / window.innerHeight,
 			1,
 			5000
 		);
-		scene.add( camera );
 		
-		camera.position.set(0,1500,0);
-		camera.lookAt( scene.position )
+		radarCamera = new THREE.PerspectiveCamera(
+			35,
+			900 / 500,
+			1,
+			5000
+		);
+		scene.add( radarCamera );
+		
+		radarCamera.position.set(0,1500,0);
+		radarCamera.lookAt( scene.position )
 
 		// Skybox
 		var imagePrefix = "images/dawnmountain-";
@@ -129,7 +143,7 @@
 		var loader = new THREE.JSONLoader();
 		 
 		loader.load( 'models/tracks/MountainTrack/MountainValley_Track.js', function ( track, track_materials ) {
-			var mesh = new Physijs.ConcaveMesh(
+			raceTrack = new Physijs.ConcaveMesh(
 				track,
 			   Physijs.createMaterial(
 					new THREE.MeshFaceMaterial( track_materials ),
@@ -137,8 +151,8 @@
 					1.0 // restitution
 					),0 //mass
 			);
-			mesh.receiveShadow = true;
-			scene.add(mesh);	
+			raceTrack.receiveShadow = true;
+			scene.add(raceTrack);	
 		});
 		
 		// Car
@@ -148,8 +162,14 @@
 		flareB = THREE.ImageUtils.loadTexture( "textures/lensflare0.png" );
 		
 		// MATERIALS
+		window.addEventListener( 'resize', onWindowResize, false );
+		selectedCar = new Cars("gallardo");
+		cameraTarget.z = 500;
+		cameraTarget.y = 0;
+		camera.position.y = 2;
+		camera.position.z = -3;
 
-		var selectedCar = new Cars("mustang");
+		camera.lookAt( cameraTarget );
         requestAnimationFrame( render );
 		scene.simulate(); // run physics
     };
@@ -159,17 +179,57 @@
 		if ( vehicle ) {
 			light.target.position.copy( vehicle.mesh.position );
 			light.position.addVectors( light.target.position, new THREE.Vector3( 20, 20, -15 ) );
+			positionTrackingOverlay(vehicle);
+			camera.lookAt( cameraTarget );
 		}
 		renderer.render( scene, camera); // render the scene
 	};
 	
     window.onload = initScene;
+	
+	positionTrackingOverlay = function(vehicle)
+	{
+		var matrix = vehicle.mesh.world.matrixWorld;
+		var visibleWidth, visibleHeight, p, v, percX, percY, left, top;
+		// perspective:
+		// this will give us position relative to the world
+		var position = new THREE.Vector3();
+		position.applyMatrix4( vehicle.mesh.matrixWorld );
+		p = position.clone();
+		// projectVector will translate position to 2d
+		v = projector.projectVector(p, radarCamera);
 
+		percX = (v.x + 1) / 2;
+		percY = (-v.y + 1) / 2;
+
+		left = percX * SCREEN_WIDTH;
+		top = percY * SCREEN_HEIGHT;
+
+		widthPercentage = (left - $(".tracking-ball").width() / 2) / SCREEN_WIDTH * 100;
+		heightPercentage = (top - $(".tracking-ball").height() / 2) / SCREEN_HEIGHT * 100;
+		$(".tracking-ball")
+			.css('left', widthPercentage + '%')
+			.css('top', heightPercentage + '%');
+	};
+	function onWindowResize( event ) {
+
+		SCREEN_WIDTH = window.innerWidth;
+		SCREEN_HEIGHT = window.innerHeight;
+
+
+		renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+	}
     </script>
 </head>
 
 <body>
 	<div id="speedometer"></div>
-    <div id="viewport"></div>
+    <div id="viewport">
+		<div id="tracking-overlay">
+			<img src="images/MountainTrack.png">
+			<div class="tracking-ball"></div>
+		</div>
+	</div>
 </body>
 </html>
