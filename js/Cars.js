@@ -1,10 +1,15 @@
 function Cars(selectedCar) {
+
+
+	
 	// Car Materials
 	var input = {
 		power: null,
 		direction: null,
 		steering: 0
 	};
+	var speed = 0;
+	var max_speed = 100;
 	var r = "textures/Bridge2/";
 	var urls = [ r + "posx.jpg", r + "negx.jpg",
 				 r + "posy.jpg", r + "negy.jpg",
@@ -63,7 +68,7 @@ function Cars(selectedCar) {
 	var connectionPoint;
 	if(selectedCar == "veyron") {
 		bodyUrl = "models/cars/veyron/parts/veyron_body_bin.js";
-		wheelUrl   = "models/cars/mustang_wheel.js";
+		wheelUrl   = "models/cars/mustang/mustang_wheel.js";
 		modelScale = .04;
 		wheelLoader = new THREE.JSONLoader();
 		bodyLoader = new THREE.BinaryLoader();
@@ -163,7 +168,7 @@ function Cars(selectedCar) {
 					car_materials[ 7 ] = mlib[ "Dark glass" ];		// windshield		
 				}else if(wheel_materials){
 					wheel_materials[ 0 ] = mlib[ "Chrome" ];	// insides
-					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// tire					
+					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// insides					
 				}
 			}else if(selectedCar == "gallardo"){
 				if(car_materials) {
@@ -174,7 +179,7 @@ function Cars(selectedCar) {
 					car_materials[ 4 ] = mlib[ "Black metal" ];
 				}else if(wheel_materials){
 					wheel_materials[ 0 ] = mlib[ "Chrome" ];	// insides
-					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// tire					
+					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// insides					
 				}
 			}else if(selectedCar == "mustang"){
 				if(car_materials) {
@@ -185,7 +190,7 @@ function Cars(selectedCar) {
 					car_materials[ 4 ] = mlib[ "Gold" ];				//Body
 				}else if(wheel_materials){
 					wheel_materials[ 0 ] = mlib[ "Chrome" ];	// insides
-					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// tire					
+					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// insides						
 				}
 			}
 	};
@@ -232,6 +237,7 @@ function Cars(selectedCar) {
 
 	function updateCar() {
 		if ( input && vehicle ) {
+			speedometer.update(speed);
 			if ( input.direction !== null ) {
 				input.steering += input.direction / 50;
 				if ( input.steering < -.6 ) 
@@ -243,10 +249,16 @@ function Cars(selectedCar) {
 			vehicle.setSteering( input.steering, 1 );
 
 			if ( input.power === true ) {
+				if(speed <= max_speed)
+					speed += 1;
 				vehicle.applyEngineForce( 1000 );
 			} else if ( input.power === false ) {
+				if(speed >= 0)
+					speed -= 1;
 				vehicle.applyEngineForce( -1000 );
 			} else {
+				if(speed >= 0)
+					speed -= .1;
 				vehicle.applyEngineForce( 0 );
 			}
 		}

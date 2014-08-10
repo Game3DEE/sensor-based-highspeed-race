@@ -17,12 +17,29 @@
 
 <script type="text/javascript" src="js/physi.js"></script>
 
+<script type="text/javascript" src="js/speedometer/speedometer.js"></script>
+<script type="text/javascript" src="js/speedometer/themes/default.js"></script>
+<script type="text/javascript" src="js/speedometer/digitaldisplay.js"></script>
+<script type="text/javascript" src="js/speedometer/controls.js"></script>
+<script type="text/javascript" src="js/speedometer/example.js"></script>
+<script type="text/javascript" src="js/speedometer/tbe.js"></script>
+<script type="text/javascript" src="js/speedometer/xcanvas.js"></script>
+<link rel="stylesheet" type="text/css" href="css/speedometer.css" media="screen" />
+
 <script type="text/javascript">
 	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 	'use strict';
+	
+	var speedometer;
+	document.addEventListener ("DOMContentLoaded", function() {
+	  document.removeEventListener ("DOMContentLoaded", arguments.callee, false);
 
-    Physijs.scripts.worker = '/js/physijs_worker.js';
-    Physijs.scripts.ammo = '/js/ammo.js';
+	  speedometer = new Speedometer ('speedometer', {theme: 'default'});
+	  speedometer.draw ();
+	  controls = new Controls (speedometer);
+	});
+    Physijs.scripts.worker = 'js/physijs_worker.js';
+    Physijs.scripts.ammo = 'ammo.js';
 
     var initScene, render, renderer, scene, box, mlib, vehicle;
 	
@@ -30,12 +47,11 @@
 	
 	var SCREEN_WIDTH = window.innerWidth;
 	var SCREEN_HEIGHT = window.innerHeight;
-
     initScene = function() {
         renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.shadowMapEnabled = true;
 		renderer.shadowMapSoft = true;
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
 
 		scene = new Physijs.Scene;
@@ -48,6 +64,9 @@
 			5000
 		);
 		scene.add( camera );
+		
+		camera.position.set(0,1500,0);
+		camera.lookAt( scene.position )
 
 		// Skybox
 		var imagePrefix = "images/dawnmountain-";
@@ -130,9 +149,7 @@
 		
 		// MATERIALS
 
-		var selectedCar = new Cars("gallardo");
-		//controls
-		controls = new THREE.OrbitControls(camera, renderer.domElement);
+		var selectedCar = new Cars("mustang");
         requestAnimationFrame( render );
 		scene.simulate(); // run physics
     };
@@ -140,8 +157,6 @@
     render = function() {
 		requestAnimationFrame( render );
 		if ( vehicle ) {
-			camera.position.copy( vehicle.mesh.position ).add( new THREE.Vector3( 20, 15, -50 ) );
-			camera.lookAt( vehicle.mesh.position );
 			light.target.position.copy( vehicle.mesh.position );
 			light.position.addVectors( light.target.position, new THREE.Vector3( 20, 20, -15 ) );
 		}
@@ -154,6 +169,7 @@
 </head>
 
 <body>
+	<div id="speedometer"></div>
     <div id="viewport"></div>
 </body>
 </html>
