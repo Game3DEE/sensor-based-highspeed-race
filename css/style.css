@@ -1,4 +1,17 @@
-
+body {
+	overflow: hidden;
+}
+#timer {
+	font-family: 'Open Sans', sans-serif;
+	position: absolute;
+	top: 20px;
+	left: 0;
+	right: 0;
+	margin-right: auto;
+	margin-left: auto;
+	width: 200px;
+	font-size: 40px;
+}
 
 #speedometer {
 	position: absolute;

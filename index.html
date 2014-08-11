@@ -28,11 +28,16 @@
 
 <script type="text/javascript" src="js/jquery.js"></script>
 
+<script type="text/javascript" src="js/timer.js"></script>
+
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
 <script type="text/javascript">
 	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 	'use strict';
 	
 	var speedometer;
+	var start = 0;
 	document.addEventListener ("DOMContentLoaded", function() {
 	  document.removeEventListener ("DOMContentLoaded", arguments.callee, false);
 
@@ -50,6 +55,7 @@
 	
 	var camera, light;
 	var projector;
+	var timer;
 	
 	var SCREEN_WIDTH = window.innerWidth;
 	var SCREEN_HEIGHT = window.innerHeight;
@@ -163,12 +169,11 @@
 		
 		// MATERIALS
 		window.addEventListener( 'resize', onWindowResize, false );
-		selectedCar = new Cars("gallardo");
+		selectedCar = new Cars("mustang");
 		cameraTarget.z = 500;
 		cameraTarget.y = 0;
 		camera.position.y = 2;
 		camera.position.z = -3;
-
 		camera.lookAt( cameraTarget );
         requestAnimationFrame( render );
 		scene.simulate(); // run physics
@@ -179,15 +184,18 @@
 		if ( vehicle ) {
 			light.target.position.copy( vehicle.mesh.position );
 			light.position.addVectors( light.target.position, new THREE.Vector3( 20, 20, -15 ) );
-			positionTrackingOverlay(vehicle);
+			positionTrackingOverlay();
 			camera.lookAt( cameraTarget );
+			if(!timer)
+				timer = new Timer();
+			timer.updateTimer(vehicle);
 		}
 		renderer.render( scene, camera); // render the scene
 	};
 	
     window.onload = initScene;
 	
-	positionTrackingOverlay = function(vehicle)
+	positionTrackingOverlay = function()
 	{
 		var matrix = vehicle.mesh.world.matrixWorld;
 		var visibleWidth, visibleHeight, p, v, percX, percY, left, top;
@@ -211,6 +219,7 @@
 			.css('left', widthPercentage + '%')
 			.css('top', heightPercentage + '%');
 	};
+	
 	function onWindowResize( event ) {
 
 		SCREEN_WIDTH = window.innerWidth;
@@ -224,6 +233,7 @@
 </head>
 
 <body>
+	<div id="timer">00:00:000</div>
 	<div id="speedometer"></div>
     <div id="viewport">
 		<div id="tracking-overlay">
