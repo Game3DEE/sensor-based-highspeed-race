@@ -1,6 +1,161 @@
 body {
-	overflow: hidden;
+	
+	margin: 0px;
 }
+
+.container{
+	text-align: center;
+
+	background: url("../images/speedway.jpg") no-repeat 50% 30% rgba(0, 0, 0, 0);
+	padding-bottom: 2em;
+}
+
+
+
+.menu ul li {
+	margin: 1em;
+	display: inline-block;
+	font-family: "Helvetica Neue";
+	list-style: none;
+	text-decoration: none;
+	-moz-box-sizing: border-box;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: 300;
+	background: none repeat scroll 0 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid #FFFFFF;
+    padding: 1em 0em;
+}
+
+
+.menu ul{
+	padding: 0;
+}
+
+.menu ul li a {
+	padding: 1em;
+
+}
+#logo{
+	width: 100%;
+	max-width: 450px;
+}
+
+.cars{
+	box-shadow: 0 20px 8px -15px rgba(0, 0, 0, 0.5) inset;
+
+	background-color: #e9e9e9;
+	margin-top: -24px;
+}
+
+.speedways{
+	box-shadow: 0 20px 8px -20px rgba(0, 0, 0, 0.5) inset;
+
+	background-color: #e9e9e9;
+	margin-top: -24px;
+}
+
+
+.general-heading{
+	padding-top: 2em;
+	padding-left: 2em;
+	font-family: "Helvetica Neue";
+	font-weight: 300;
+	font-size: 1.5em;
+}
+
+.size{
+	width: 280px;
+	height: 280px;
+}
+
+.center-content ul {
+	text-align: center;
+	padding: 1em 0em;
+}
+
+.center-content ul li{
+    padding: 0em 2em;
+	display: inline-block;
+	font-family: "Helvetica Neue";
+	list-style: none;
+	text-decoration: none;
+	text-align: center;
+    text-decoration: none;
+    font-weight: 300;
+}
+
+.center-content ul li a{
+	margin-left: 15px;
+	
+}
+
+.round-button {
+	width:280px;
+	margin: 1.5em 0;
+
+}
+.round-button-circle {
+	width: 100%;
+	height:0;
+	padding-bottom: 100%;
+    border-radius: 50%;
+	border:10px solid #cfdcec;
+    overflow:hidden;
+    
+    background: #4679BD; 
+    box-shadow: 0 0 3px gray;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+
+}
+
+
+/*Radio-Buttons mit Checkhaken*/
+
+.radio{
+	margin-top: 4.5em;
+	margin-bottom: 2.5em;
+	cursor: pointer;
+}
+
+.radio label:before {
+	border-radius: 50px;
+}
+
+label {
+	display: inline-block;
+	cursor: pointer;
+	position: relative;
+	padding: 0em 2em;
+	font-size: 13px;
+}
+
+input[type=radio],
+input[type=checkbox] {
+	display: none;
+}
+label:before {
+	content: "";
+	width: 60px;
+	height: 60px;
+	position: absolute;
+	left: 0;
+	bottom: 0px;
+	background-color: transparent;
+	border: 5px solid grey;
+	
+}
+
+input[type=radio]:checked + label:before {
+    content: "\2713";
+    color: #418f58;
+    font-size: 60px;
+    text-align: center;
+    line-height: 60px;
+    border: 5px solid #418f58;
+}
+
 #timer {
 	font-family: 'Open Sans', sans-serif;
 	position: absolute;
