@@ -235,7 +235,12 @@ function Cars(selectedCar) {
 
 	function updateCar() {
 		if ( input && vehicle ) {
-			speedometer.update(speed);
+			var speed = Math.sqrt(Math.pow(vehicle.mesh.getLinearVelocity().x, 2)+Math.pow(vehicle.mesh.getLinearVelocity().z, 2))*1.5; // y kann vernachlässigt werden!
+			if(speed < 0)
+				speedometer.update(speed * -1);
+			else
+				speedometer.update(speed * 1);
+			tachometer.update(((speed*100)%4000)+1000);
 			if ( input.direction !== null ) {
 				input.steering += input.direction / 50;
 				if ( input.steering < -.6 ) 
@@ -247,16 +252,10 @@ function Cars(selectedCar) {
 			vehicle.setSteering( input.steering, 1 );
 
 			if ( input.power === true ) {
-				if(speed <= max_speed)
-					speed += 1;
 				vehicle.applyEngineForce( 1000 );
 			} else if ( input.power === false ) {
-				if(speed >= 0)
-					speed -= 1;
 				vehicle.applyEngineForce( -1000 );
 			} else {
-				if(speed >= 0)
-					speed -= .1;
 				vehicle.applyEngineForce( 0 );
 			}
 		}

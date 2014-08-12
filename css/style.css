@@ -156,6 +156,11 @@ input[type=radio]:checked + label:before {
     border: 5px solid #418f58;
 }
 
+
+/* Game CSS */
+#viewport {
+	overflow: hidden;
+}
 #timer {
 	font-family: 'Open Sans', sans-serif;
 	position: absolute;
@@ -167,16 +172,26 @@ input[type=radio]:checked + label:before {
 	width: 200px;
 	font-size: 40px;
 }
-
-#speedometer {
+#tacho {
 	position: absolute;
 	bottom: 20px;
 	margin-left: auto;
 	margin-right: auto;
 	left: 0;
 	right: 0;
-	width: 200px;
-	height: 200px;
+	width: 270px;
+	height: 150px;
+}
+#speedometer {
+	float: left;
+	width: 150px;
+	height: 150px;
+}
+#tachometer {
+	float: left;
+	width: 120px;
+	height: 120px;
+	margin-top: 30px;
 }
 #tracking-overlay {
 	position: absolute;

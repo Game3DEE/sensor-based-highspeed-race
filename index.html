@@ -20,7 +20,6 @@
 <script type="text/javascript" src="js/speedometer/speedometer.js"></script>
 <script type="text/javascript" src="js/speedometer/themes/default.js"></script>
 <script type="text/javascript" src="js/speedometer/digitaldisplay.js"></script>
-<script type="text/javascript" src="js/speedometer/controls.js"></script>
 <script type="text/javascript" src="js/speedometer/example.js"></script>
 <script type="text/javascript" src="js/speedometer/tbe.js"></script>
 <script type="text/javascript" src="js/speedometer/xcanvas.js"></script>
@@ -41,14 +40,13 @@
 	document.addEventListener ("DOMContentLoaded", function() {
 	  document.removeEventListener ("DOMContentLoaded", arguments.callee, false);
 
-	  speedometer = new Speedometer ('speedometer', {theme: 'default'});
+	  speedometer = new Speedometer ('speedometer', {theme: 'default', max: 200.0});
 	  speedometer.draw ();
-	  controls = new Controls (speedometer);
+	  tachometer = new Speedometer ('tachometer', {theme: 'default', max: 7000.0});
+	  tachometer.draw ();
 	});
     Physijs.scripts.worker = 'js/physijs_worker.js';
     Physijs.scripts.ammo = 'ammo.js';
-	var speed = 0;
-	var max_speed = 100;
     var initScene, render, renderer, scene, box, mlib, radarCamera, selectedCar;
 	var vehicle, raceTrack, cameraTarget;
 	var $trackingOverlay = $('#tracking-overlay');
@@ -234,7 +232,10 @@
 
 <body>
 	<div id="timer">00:00:000</div>
-	<div id="speedometer"></div>
+	<div id="tacho">
+		<div id="speedometer"></div>
+		<div id="tachometer"></div>
+	</div>
     <div id="viewport">
 		<div id="tracking-overlay">
 			<img src="images/MountainTrack.png">
