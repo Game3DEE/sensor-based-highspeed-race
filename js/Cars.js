@@ -3,6 +3,8 @@ function Cars(selectedCar) {
 
 	
 	// Car Materials
+	var damage = 0;
+	var speed;
 	var input = {
 		power: null,
 		direction: null,
@@ -117,20 +119,30 @@ function Cars(selectedCar) {
 					car,
 					new THREE.MeshFaceMaterial( car_materials )
 				);
-				mesh.position.y = 6;
-				mesh.position.x = -30;
+				mesh.position.y = track.vehiclePosition.y;
+				mesh.position.x = track.vehiclePosition.x;
+				mesh.position.z = track.vehiclePosition.z;
 				mesh.castShadow = mesh.receiveShadow = true;
 
 				vehicle = new Physijs.Vehicle(mesh, new Physijs.VehicleTuning(
-					10.88,
-					1.83,
-					0.28,
-					500,
-					10.5,
-					6000
+					5.88,	// suspension_stiffness		(Federung Steifheit)
+					1.83,	// suspension_compression	(Federung Druck)
+					0.28,	// suspension_damping		(Federung Dämfpung)
+					500,	// max_suspension_travel	(Federung max Bewegungsgrad)
+					10.5,	// friction_slip			(Reibung nachlassen)
+					6000	// max_suspension_force
 				));
+				mesh.addEventListener( 'collision', function( raceTrack, linear_velocity ) {
+					damage += 1+(speed/10);
+					$("#damage").css("background-image", "-moz-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
+					$("#damage").css("background-image", "-webkit-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
+					$("#damage").css("background-image", "-ms-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
+					$("#damage").css("background-image", "-o-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
+					$("#damage").css("background-image", "linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
+				});
 				scene.add( vehicle );
-				vehicle.mesh.add(camera);
+				vehicle.mesh.add(frontCamera);
+				vehicle.mesh.add(backCamera);
 				addMaterials(0,wheel_materials);
 				var wheel_material = new THREE.MeshFaceMaterial( wheel_materials );			
 				for ( var i = 0; i < 4; i++ ) {
@@ -210,6 +222,12 @@ function Cars(selectedCar) {
 			case 40: // back
 				input.power = false;
 				break;
+			case 32: // leer
+				if(selectedCamera == "frontCamera")
+					selectedCamera = "backCamera";
+				else
+					selectedCamera = "frontCamera";
+				break;
 		}
 	};
 
@@ -235,7 +253,7 @@ function Cars(selectedCar) {
 
 	function updateCar() {
 		if ( input && vehicle ) {
-			var speed = Math.sqrt(Math.pow(vehicle.mesh.getLinearVelocity().x, 2)+Math.pow(vehicle.mesh.getLinearVelocity().z, 2))*1.5; // y kann vernachlässigt werden!
+			speed = Math.sqrt(Math.pow(vehicle.mesh.getLinearVelocity().x, 2)+Math.pow(vehicle.mesh.getLinearVelocity().z, 2))*1.5; // y kann vernachlässigt werden!
 			if(speed < 0)
 				speedometer.update(speed * -1);
 			else

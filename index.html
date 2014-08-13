@@ -28,13 +28,15 @@
 <script type="text/javascript" src="js/jquery.js"></script>
 
 <script type="text/javascript" src="js/timer.js"></script>
+<script type="text/javascript" src="js/track.js"></script>
+<script type="text/javascript" src="js/sounds.js"></script>
 
 <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 
 <script type="text/javascript">
 	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 	'use strict';
-	
+			var sound3 = new Sound( [ 'sounds/car_stand.mp3'], 275, 10 );
 	var speedometer;
 	var start = 0;
 	document.addEventListener ("DOMContentLoaded", function() {
@@ -51,10 +53,10 @@
 	var vehicle, raceTrack, cameraTarget;
 	var $trackingOverlay = $('#tracking-overlay');
 	
-	var camera, light;
+	var frontCamera, light, backCamera, selectedCamera = "frontCamera";
 	var projector;
 	var timer;
-	
+	var track;
 	var SCREEN_WIDTH = window.innerWidth;
 	var SCREEN_HEIGHT = window.innerHeight;
     initScene = function() {
@@ -65,10 +67,22 @@
 		renderer.shadowMapSoft = true;
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById( 'viewport' ).appendChild( renderer.domElement );
-
 		scene = new Physijs.Scene;
 		scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
-		camera = new THREE.PerspectiveCamera(
+		frontCamera = new THREE.PerspectiveCamera(
+			35,
+			window.innerWidth / window.innerHeight,
+			1,
+			5000
+		);
+
+		var sound1 = new Sound( [ 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3'], 275, 1 );
+		sound1.play();
+		
+		var sound2 = new Sound( [ 'sounds/start-car.mp3'], 275, 1 );
+		sound2.play();
+		
+		backCamera = new THREE.PerspectiveCamera(
 			35,
 			window.innerWidth / window.innerHeight,
 			1,
@@ -101,31 +115,6 @@
 		var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
 		scene.add( skyBox );
 
-		// Ground
-		ground_material = Physijs.createMaterial(
-			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'models/tracks/MountainTrack/Grass_256.png' ) }),
-			1, // high friction
-			1 // low restitution
-		);
-		ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
-		ground_material.map.repeat.set( 100, 100 );
-
-		var ground_geometry = new THREE.PlaneGeometry( 5000, 5000, 5000 );
-		ground_geometry.computeFaceNormals();
-		ground_geometry.computeVertexNormals();
-
-		// If your plane is not square as far as face count then the HeightfieldMesh
-		// takes two more arguments at the end: # of x faces and # of z faces that were passed to THREE.PlaneMaterial
-		ground = new Physijs.BoxMesh(
-				ground_geometry,
-				ground_material,
-				0 // mass
-		);
-		ground.rotation.x = -Math.PI / 2;
-		ground.receiveShadow = true;
-		ground.position.set(0, -1, 0);
-		scene.add( ground );
-
 		// Light
 		light = new THREE.DirectionalLight( 0xFFFFFF );
 		light.position.set( 20, 20, -15 );
@@ -143,22 +132,9 @@
 		scene.add( light );
 		
 		// Strecke
-		
-		var loader = new THREE.JSONLoader();
-		 
-		loader.load( 'models/tracks/MountainTrack/MountainValley_Track.js', function ( track, track_materials ) {
-			raceTrack = new Physijs.ConcaveMesh(
-				track,
-			   Physijs.createMaterial(
-					new THREE.MeshFaceMaterial( track_materials ),
-					1.0, // friction
-					1.0 // restitution
-					),0 //mass
-			);
-			raceTrack.receiveShadow = true;
-			scene.add(raceTrack);	
-		});
-		
+		track = new Track();
+		track.loadTrack("Mountain");
+		console.log(track.vehiclePosition.y);
 		// Car
 		// FLARES
 
@@ -170,9 +146,14 @@
 		selectedCar = new Cars("mustang");
 		cameraTarget.z = 500;
 		cameraTarget.y = 0;
-		camera.position.y = 2;
-		camera.position.z = -3;
-		camera.lookAt( cameraTarget );
+		backCamera.position.y = 5;
+		backCamera.position.z = -30;
+		
+		frontCamera.position.y = 2;
+		frontCamera.position.z = -3;
+		frontCamera.lookAt( cameraTarget );
+		
+		backCamera.lookAt( cameraTarget );
         requestAnimationFrame( render );
 		scene.simulate(); // run physics
     };
@@ -183,12 +164,16 @@
 			light.target.position.copy( vehicle.mesh.position );
 			light.position.addVectors( light.target.position, new THREE.Vector3( 20, 20, -15 ) );
 			positionTrackingOverlay();
-			camera.lookAt( cameraTarget );
+			frontCamera.lookAt( cameraTarget );
 			if(!timer)
 				timer = new Timer();
 			timer.updateTimer(vehicle);
 		}
-		renderer.render( scene, camera); // render the scene
+		sound3.play();
+		if(selectedCamera == "frontCamera")
+			renderer.render( scene, frontCamera); // render the scene
+		else
+			renderer.render( scene, backCamera);
 	};
 	
     window.onload = initScene;
@@ -242,5 +227,6 @@
 			<div class="tracking-ball"></div>
 		</div>
 	</div>
+	<div id="damage"></div>
 </body>
 </html>

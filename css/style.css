@@ -216,3 +216,15 @@ input[type=radio]:checked + label:before {
 	width: 5px;
 	height: 5px;
 }
+#damage {
+	position: absolute;
+	bottom: 20px;
+	right: 30px;
+	width: 200px;
+	height: 20px;
+	border: 1px solid #fff;
+	background-image: -moz-linear-gradient(left, #8B0000 1%, transparent 1%);
+	background-image: -webkit-linear-gradient(left, #8B0000 1%, transparent 1%);
+	background-image: -ms-linear-gradient(left, #8B0000 1%, transparent 1%);
+	background-image: -o-linear-gradient(left, #8B0000 1%, transparent 1%);
+}
