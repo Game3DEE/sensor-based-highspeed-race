@@ -1,5 +1,5 @@
 body {
-	
+	font-family: 'Open Sans', sans-serif;	
 	margin: 0px;
 }
 
@@ -15,7 +15,6 @@ body {
 .menu ul li {
 	margin: 1em;
 	display: inline-block;
-	font-family: "Helvetica Neue";
 	list-style: none;
 	text-decoration: none;
 	-moz-box-sizing: border-box;
@@ -59,7 +58,6 @@ body {
 .general-heading{
 	padding-top: 2em;
 	padding-left: 2em;
-	font-family: "Helvetica Neue";
 	font-weight: 300;
 	font-size: 1.5em;
 }
@@ -77,7 +75,6 @@ body {
 .center-content ul li{
     padding: 0em 2em;
 	display: inline-block;
-	font-family: "Helvetica Neue";
 	list-style: none;
 	text-decoration: none;
 	text-align: center;
@@ -162,7 +159,6 @@ input[type=radio]:checked + label:before {
 	overflow: hidden;
 }
 #timer {
-	font-family: 'Open Sans', sans-serif;
 	position: absolute;
 	top: 20px;
 	left: 0;

@@ -141,8 +141,17 @@ function Cars(selectedCar) {
 					$("#damage").css("background-image", "linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
 				});
 				scene.add( vehicle );
+				var object = new THREE.Object3D()
 				vehicle.mesh.add(frontCamera);
-				vehicle.mesh.add(backCamera);
+				backCamera.addTarget({
+					name: 'myTarget',
+					targetObject: vehicle.mesh,
+					cameraPosition: new THREE.Vector3(0, 2, -20),
+					fixed: false,
+					stiffness: 0.1,
+					matchRotation: false
+				});
+				backCamera.setTarget( 'myTarget' );
 				addMaterials(0,wheel_materials);
 				var wheel_material = new THREE.MeshFaceMaterial( wheel_materials );			
 				for ( var i = 0; i < 4; i++ ) {

@@ -1,232 +1,155 @@
-<!doctype html>
-<html lang="en">
-<head>
-<title>Test von Web GL</title>
-<meta charset="utf-8">
-</head>
-<body style="margin: 0;">
- 
-<script src="js/three.min.js"></script>
-<script src="js/OrbitControls.js"></script>
-<script src="js/ColladaLoader.js"></script>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>sensor-based-highspeed-race</title>	
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<script src="js/three.min.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/ColladaLoader.js"></script>
 
-<script src="js/BinaryLoader.js"></script>
-<script src="js/Cars.js"></script>
-<script src="js/Detector.js"></script>
-<script src="js/stats.min.js"></script>
+		<script src="js/BinaryLoader.js"></script>
+		<script src="js/Cars.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/stats.min.js"></script>
 
-<script type="text/javascript" src="js/physi.js"></script>
+		<script type="text/javascript" src="js/physi.js"></script>
 
-<script type="text/javascript" src="js/speedometer/speedometer.js"></script>
-<script type="text/javascript" src="js/speedometer/themes/default.js"></script>
-<script type="text/javascript" src="js/speedometer/digitaldisplay.js"></script>
-<script type="text/javascript" src="js/speedometer/example.js"></script>
-<script type="text/javascript" src="js/speedometer/tbe.js"></script>
-<script type="text/javascript" src="js/speedometer/xcanvas.js"></script>
-<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />
+		<script type="text/javascript" src="js/speedometer/speedometer.js"></script>
+		<script type="text/javascript" src="js/speedometer/themes/default.js"></script>
+		<script type="text/javascript" src="js/speedometer/digitaldisplay.js"></script>
+		<script type="text/javascript" src="js/speedometer/example.js"></script>
+		<script type="text/javascript" src="js/speedometer/tbe.js"></script>
+		<script type="text/javascript" src="js/speedometer/xcanvas.js"></script>
+		<script type="text/javascript" src="js/THREE.TargetCamera.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />
 
-<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/jquery.js"></script>
+		
+		<script type="text/javascript" src="js/sounds.js"></script>		
+		<script type="text/javascript" src="js/game.js"></script>
+		<script type="text/javascript" src="js/timer.js"></script>
+		<script type="text/javascript" src="js/track.js"></script>
 
-<script type="text/javascript" src="js/timer.js"></script>
-<script type="text/javascript" src="js/track.js"></script>
-<script type="text/javascript" src="js/sounds.js"></script>
-
-<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-
-<script type="text/javascript">
-	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
-	'use strict';
-			var sound3 = new Sound( [ 'sounds/car_stand.mp3'], 275, 10 );
-	var speedometer;
-	var start = 0;
-	document.addEventListener ("DOMContentLoaded", function() {
-	  document.removeEventListener ("DOMContentLoaded", arguments.callee, false);
-
-	  speedometer = new Speedometer ('speedometer', {theme: 'default', max: 200.0});
-	  speedometer.draw ();
-	  tachometer = new Speedometer ('tachometer', {theme: 'default', max: 7000.0});
-	  tachometer.draw ();
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<script type="text/javascript">
+	var sound1 = new Sound( [ 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3'], 275, 1 );
+	sound1.play();
+	$( document ).ready(function() {
+		$("#game").children().hide();
+		$( ".start" ).click(function() {
+			initScene($('input[name=gender]:checked', '#selectCar').val(), $('input[name=gender]:checked', '#selectTrack').val());
+			$("#startpage").hide();
+			$("#game").children().show();
+		});
 	});
-    Physijs.scripts.worker = 'js/physijs_worker.js';
-    Physijs.scripts.ammo = 'ammo.js';
-    var initScene, render, renderer, scene, box, mlib, radarCamera, selectedCar;
-	var vehicle, raceTrack, cameraTarget;
-	var $trackingOverlay = $('#tracking-overlay');
-	
-	var frontCamera, light, backCamera, selectedCamera = "frontCamera";
-	var projector;
-	var timer;
-	var track;
-	var SCREEN_WIDTH = window.innerWidth;
-	var SCREEN_HEIGHT = window.innerHeight;
-    initScene = function() {
-		cameraTarget = new THREE.Vector3();
-		projector = new THREE.Projector();
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-		renderer.shadowMapEnabled = true;
-		renderer.shadowMapSoft = true;
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById( 'viewport' ).appendChild( renderer.domElement );
-		scene = new Physijs.Scene;
-		scene.setGravity(new THREE.Vector3( 0, -30, 0 ));
-		frontCamera = new THREE.PerspectiveCamera(
-			35,
-			window.innerWidth / window.innerHeight,
-			1,
-			5000
-		);
-
-		var sound1 = new Sound( [ 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3'], 275, 1 );
-		sound1.play();
-		
-		var sound2 = new Sound( [ 'sounds/start-car.mp3'], 275, 1 );
-		sound2.play();
-		
-		backCamera = new THREE.PerspectiveCamera(
-			35,
-			window.innerWidth / window.innerHeight,
-			1,
-			5000
-		);
-		
-		radarCamera = new THREE.PerspectiveCamera(
-			35,
-			900 / 500,
-			1,
-			5000
-		);
-		scene.add( radarCamera );
-		
-		radarCamera.position.set(0,1500,0);
-		radarCamera.lookAt( scene.position )
-
-		// Skybox
-		var imagePrefix = "images/dawnmountain-";
-		var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
-		var imageSuffix = ".png";
-		var skyGeometry = new THREE.BoxGeometry( 5000, 5000, 5000 );	
-		var materialArray = [];
-		for (var i = 0; i < 6; i++)
-			materialArray.push( new THREE.MeshBasicMaterial({
-				map: THREE.ImageUtils.loadTexture( imagePrefix + directions[i] + imageSuffix ),
-				side: THREE.BackSide
-			}));
-		var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
-		var skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
-		scene.add( skyBox );
-
-		// Light
-		light = new THREE.DirectionalLight( 0xFFFFFF );
-		light.position.set( 20, 20, -15 );
-		light.target.position.copy( scene.position );
-		light.castShadow = true;
-		light.shadowCameraLeft = -150;
-		light.shadowCameraTop = -150;
-		light.shadowCameraRight = 150;
-		light.shadowCameraBottom = 150;
-		light.shadowCameraNear = 20;
-		light.shadowCameraFar = 400;
-		light.shadowBias = -.0001
-		light.shadowMapWidth = light.shadowMapHeight = 2048;
-		light.shadowDarkness = .7;
-		scene.add( light );
-		
-		// Strecke
-		track = new Track();
-		track.loadTrack("Mountain");
-		console.log(track.vehiclePosition.y);
-		// Car
-		// FLARES
-
-		flareA = THREE.ImageUtils.loadTexture( "textures/lensflare2.jpg" );
-		flareB = THREE.ImageUtils.loadTexture( "textures/lensflare0.png" );
-		
-		// MATERIALS
-		window.addEventListener( 'resize', onWindowResize, false );
-		selectedCar = new Cars("mustang");
-		cameraTarget.z = 500;
-		cameraTarget.y = 0;
-		backCamera.position.y = 5;
-		backCamera.position.z = -30;
-		
-		frontCamera.position.y = 2;
-		frontCamera.position.z = -3;
-		frontCamera.lookAt( cameraTarget );
-		
-		backCamera.lookAt( cameraTarget );
-        requestAnimationFrame( render );
-		scene.simulate(); // run physics
-    };
-
-    render = function() {
-		requestAnimationFrame( render );
-		if ( vehicle ) {
-			light.target.position.copy( vehicle.mesh.position );
-			light.position.addVectors( light.target.position, new THREE.Vector3( 20, 20, -15 ) );
-			positionTrackingOverlay();
-			frontCamera.lookAt( cameraTarget );
-			if(!timer)
-				timer = new Timer();
-			timer.updateTimer(vehicle);
-		}
-		sound3.play();
-		if(selectedCamera == "frontCamera")
-			renderer.render( scene, frontCamera); // render the scene
-		else
-			renderer.render( scene, backCamera);
-	};
-	
-    window.onload = initScene;
-	
-	positionTrackingOverlay = function()
-	{
-		var matrix = vehicle.mesh.world.matrixWorld;
-		var visibleWidth, visibleHeight, p, v, percX, percY, left, top;
-		// perspective:
-		// this will give us position relative to the world
-		var position = new THREE.Vector3();
-		position.applyMatrix4( vehicle.mesh.matrixWorld );
-		p = position.clone();
-		// projectVector will translate position to 2d
-		v = projector.projectVector(p, radarCamera);
-
-		percX = (v.x + 1) / 2;
-		percY = (-v.y + 1) / 2;
-
-		left = percX * SCREEN_WIDTH;
-		top = percY * SCREEN_HEIGHT;
-
-		widthPercentage = (left - $(".tracking-ball").width() / 2) / SCREEN_WIDTH * 100;
-		heightPercentage = (top - $(".tracking-ball").height() / 2) / SCREEN_HEIGHT * 100;
-		$(".tracking-ball")
-			.css('left', widthPercentage + '%')
-			.css('top', heightPercentage + '%');
-	};
-	
-	function onWindowResize( event ) {
-
-		SCREEN_WIDTH = window.innerWidth;
-		SCREEN_HEIGHT = window.innerHeight;
-
-
-		renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
-
-	}
-    </script>
-</head>
-
-<body>
-	<div id="timer">00:00:000</div>
-	<div id="tacho">
-		<div id="speedometer"></div>
-		<div id="tachometer"></div>
-	</div>
-    <div id="viewport">
-		<div id="tracking-overlay">
-			<img src="images/MountainTrack.png">
-			<div class="tracking-ball"></div>
+	</script>
+ 	</head>
+	<body>
+	<div id="startpage">
+		<div class="container">
+			<div class="content">
+				<img id ="logo" src="images/racing-logo.png">
+			</div>
+			<div class="menu">
+				<ul>
+					<li class="start"><a>Start Game</a></li>
+				</ul>
+				
+			</div>
 		</div>
+		<div class="cars">
+			<p class="general-heading">Choose your car:</p>
+			<div class="center-content">
+				<form id="selectCar">
+					<ul>
+						<li>
+							<a>Bugatti Veyron</a>
+							<div class="round-button">
+								<div class="round-button-circle"> 
+									<img class="size" src="images/veyron.gif">
+								</div>
+							</div>
+							<div class="radio">
+								<input id="veyron" type="radio" id="veyron" name="gender" value="veyron">
+								<label for="veyron"></label>
+							</div>
+						</li>
+						<li>
+							<a>Lamborghini Gallardo</a>
+							<div class="round-button">
+								<div class="round-button-circle"> 
+									<img class="size" src="images/gallardo.gif">
+								</div>
+							</div>
+							<div class="radio">
+								<input id="gallardo" type="radio" id="gallardo" name="gender" value="gallardo">
+								<label for="gallardo"></label>
+							</div>
+						</li>
+						<li>
+							<a>Ford Mustang</a>
+							<div class="round-button">
+								<div class="round-button-circle"> 
+									<img class="size" src="images/mustang.gif">
+								</div>
+							</div>
+							<div class="radio">
+								<input id="mustang" type="radio" id="mustang" name="gender" value="mustang" checked>
+								<label for="mustang"></label>
+							</div>
+						</li>
+					</ul>
+				</form>
+			</div>
+		</div>
+			
+			<div class="speedways">
+				<p class="general-heading">Choose your speedway:</p>
+				<div class="center-content">
+					<form id="selectTrack">
+						<ul>
+							<li>
+								<a>Mountain Valley Raceway</a>
+								<div class="round-button">
+									<div class="round-button-circle"> 
+										<img  src="images/MountainTrack-top.jpg">
+									</div>
+								</div>
+								<div class="radio">
+									<input id="mountain-track" type="radio" name="gender" value="Mountain" checked>
+									<label for="mountain-track"></label>
+								</div>
+							</li>
+							<li>
+								<a>City Speedway</a>
+								<div class="round-button">
+									<div class="round-button-circle"> 
+										<img class="size" src="images/gallardo.gif">
+									</div>
+								</div>
+								<div class="radio">
+									<input id="city" type="radio" name="gender" value="city">
+									<label for="city"></label>
+								</div>
+							</li>
+						</ul>
+					</form>
+				</div>
+			</div>
 	</div>
-	<div id="damage"></div>
-</body>
+	<div id="game">
+		<div id="timer">00:00:000</div>
+		<div id="tacho">
+			<div id="speedometer"></div>
+			<div id="tachometer"></div>
+		</div>
+		<div id="viewport">
+			<div id="tracking-overlay">
+				<img src="images/MountainTrack.png">
+				<div class="tracking-ball"></div>
+			</div>
+		</div>
+		<div id="damage"></div>
+	</div>
+	</body>
 </html>
