@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>sensor-based-highspeed-race</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<meta name="viewport" content="initial-scale=1.0">
 		<link href="css/style.css" rel="stylesheet" type="text/css" />
 		<script src="js/three.min.js"></script>
 		<script src="js/ColladaLoader.js"></script>
@@ -20,7 +20,7 @@
 		<script type="text/javascript" src="js/speedometer/example.js"></script>
 		<script type="text/javascript" src="js/speedometer/tbe.js"></script>
 		<script type="text/javascript" src="js/speedometer/xcanvas.js"></script>
-		<script type="text/javascript" src="js/THREE.TargetCamera.js"></script>
+		<script type="text/javascript" src="js/TargetCamera.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />
 
 		<script type="text/javascript" src="js/jquery.js"></script>
@@ -29,12 +29,13 @@
 		<script type="text/javascript" src="js/game.js"></script>
 		<script type="text/javascript" src="js/timer.js"></script>
 		<script type="text/javascript" src="js/track.js"></script>
+		<script type="text/javascript" src="js/radar.js"></script>
 		
 		<script type="text/javascript" src="js/deviceController.js"></script>
 
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 	<script type="text/javascript">
-	var sound1 = new Sound( [ 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3'], 275, 1 );
+	var sound1 = new Sound( [ 'sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3'], 275, .1 );
 	sound1.play();
 	$( document ).ready(function() {
 		$("#game").children().hide();
@@ -43,6 +44,7 @@
 			$("#startpage").hide();
 			$("#game").children().show();
 			$("#result").hide();
+			$("#hurt").hide();
 		});
 	});
 	</script>
@@ -106,34 +108,35 @@
 			</div>
 		</div>
 			
-			<div class="speedways">
-				<p class="general-heading">Choose your speedway:</p>
-				<div class="center-content">
-					<form id="selectTrack">
-						<ul>
-							<li>
-								<a>Mountain Valley Raceway</a>
-								<div class="round-button">
-									<div class="round-button-circle"> 
-										<img  src="images/MountainTrack-top.jpg">
-									</div>
+		<div class="speedways">
+			<p class="general-heading">Choose your speedway:</p>
+			<div class="center-content">
+				<form id="selectTrack">
+					<ul>
+						<li>
+							<a>Mountain Valley Raceway</a>
+							<div class="round-button">
+								<div class="round-button-circle"> 
+									<img  src="images/MountainTrack-top.jpg">
 								</div>
-								<div class="radio">
-									<input id="mountain-track" type="radio" name="gender" value="Mountain" checked>
-									<label for="mountain-track"></label>
-								</div>
-							</li>
-						</ul>
-					</form>
-				</div>
+							</div>
+							<div class="radio">
+								<input id="mountain-track" type="radio" name="gender" value="Mountain" checked>
+								<label for="mountain-track"></label>
+							</div>
+						</li>
+					</ul>
+				</form>
 			</div>
+		</div>
 	</div>
 	<div id="game">
+		<div id="hurt"></div>
 		<div id="result">
-			<div class="win">Du hast die Strecke erfolgreich beendet. Deine Zeit:
+			<div class="win">!!YOU WIN!! Your time:
 				<div class="time"></div>
 			</div>
-			<div class="crash">Du hast dein Auto geschrottet! Versuch es noch einmal.</div>
+			<div class="crash">You destroyed your car. Try again!</div>
 			<a class="restart button gray" href="#">Restart</a>
 		</div>
 		<div id="timer">00:00:000</div>

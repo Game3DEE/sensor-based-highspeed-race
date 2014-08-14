@@ -135,6 +135,9 @@ function Cars(selectedCar) {
 						crashed = true;
 						return
 					}
+					$("#hurt").fadeIn(75);
+					$("#hurt").fadeOut(350);
+					
 					damage += 1+(speed/10);
 					$("#damage").css("background-image", "-moz-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
 					$("#damage").css("background-image", "-webkit-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
@@ -146,14 +149,13 @@ function Cars(selectedCar) {
 				var object = new THREE.Object3D()
 				vehicle.mesh.add(frontCamera);
 				backCamera.addTarget({
-					name: 'myTarget',
+					name: 'vehicle',
 					targetObject: vehicle.mesh,
 					cameraPosition: new THREE.Vector3(0, 2, -20),
-					fixed: false,
 					stiffness: 0.1,
 					matchRotation: false
 				});
-				backCamera.setTarget( 'myTarget' );
+				backCamera.setTarget( 'vehicle' );
 				addMaterials(0,wheel_materials);
 				var wheel_material = new THREE.MeshFaceMaterial( wheel_materials );			
 				for ( var i = 0; i < 4; i++ ) {

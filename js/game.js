@@ -1,4 +1,3 @@
-
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 'use strict';
 
@@ -14,7 +13,7 @@ var vehicle, raceTrack, cameraTarget;
 var $trackingOverlay = $('#tracking-overlay');
 
 // HUD
-var projector, timer, speedometer, crashed;
+var projector, timer, speedometer, crashed, radar;
 
 // Race
 var light, track, selectedCar;
@@ -30,7 +29,6 @@ document.addEventListener ("DOMContentLoaded", function() {
   tachometer = new Speedometer ('tachometer', {theme: 'default', max: 7000.0});
   tachometer.draw ();
 });
-
 initScene = function(selectedCar, selectedTrack) {
 	if(  /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ){
 		var deviceController = new DeviceController();
@@ -41,6 +39,8 @@ initScene = function(selectedCar, selectedTrack) {
 		   window.onorientationchange = deviceController.readDeviceOrientation(g,b,a);
 		}, false);
 	}
+	//HUD
+	$('#hurt').css({width: SCREEN_WIDTH, height: SCREEN_HEIGHT});
 	
 	cameraTarget = new THREE.Vector3();
 	projector = new THREE.Projector();
@@ -59,7 +59,7 @@ initScene = function(selectedCar, selectedTrack) {
 		5000
 	);
 	
-	backCamera = new THREE.TargetCamera( 35, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 5000 );
+	backCamera = new TargetCamera( 35, SCREEN_WIDTH / SCREEN_HEIGHT, 1, 5000 );
 	
 	radarCamera = new THREE.PerspectiveCamera(
 		35,
@@ -107,7 +107,6 @@ initScene = function(selectedCar, selectedTrack) {
 	// Strecke
 	track = new Track();
 	track.loadTrack(selectedTrack);
-	console.log(track.vehiclePosition.y);
 	
 	window.addEventListener( 'resize', onWindowResize, false );
 	
@@ -120,6 +119,7 @@ initScene = function(selectedCar, selectedTrack) {
 	frontCamera.position.y = 2;
 	frontCamera.position.z = -3;
 	frontCamera.lookAt( cameraTarget );
+	
 	requestAnimationFrame( render );
 	scene.simulate(); // run physics
 	$( ".restart" ).click(function() {
@@ -135,7 +135,9 @@ render = function() {
 	if ( vehicle ) {
 		light.target.position.copy( vehicle.mesh.position );
 		light.position.addVectors( light.target.position, new THREE.Vector3( 20, 130, -15 ) );
-		positionTrackingOverlay();
+		if(!radar)
+			radar = new Radar()
+		radar.updateRadar();
 		frontCamera.lookAt( cameraTarget );
 		backCamera.update();
 		if(!timer)
@@ -164,36 +166,12 @@ render = function() {
 	}
 };
 
-positionTrackingOverlay = function()
-{
-	var matrix = vehicle.mesh.world.matrixWorld;
-	var visibleWidth, visibleHeight, p, v, percX, percY, left, top;
-	// perspective:
-	// this will give us position relative to the world
-	var position = new THREE.Vector3();
-	position.applyMatrix4( vehicle.mesh.matrixWorld );
-	p = position.clone();
-	// projectVector will translate position to 2d
-	v = projector.projectVector(p, radarCamera);
-
-	percX = (v.x + 1) / 2;
-	percY = (-v.y + 1) / 2;
-
-	left = percX * SCREEN_WIDTH;
-	top = percY * SCREEN_HEIGHT;
-
-	widthPercentage = (left - $(".tracking-ball").width() / 2) / SCREEN_WIDTH * 100;
-	heightPercentage = (top - $(".tracking-ball").height() / 2) / SCREEN_HEIGHT * 100;
-	$(".tracking-ball")
-		.css('left', widthPercentage + '%')
-		.css('top', heightPercentage + '%');
-};
 function onWindowResize( event ) {
-
+	
 	SCREEN_WIDTH = window.innerWidth;
 	SCREEN_HEIGHT = window.innerHeight;
 
-
+	$('#hurt').css({width: SCREEN_WIDTH, height: SCREEN_HEIGHT,});
 	renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 }
