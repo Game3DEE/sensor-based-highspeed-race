@@ -10,10 +10,8 @@ function Cars(selectedCar) {
 		direction: null,
 		steering: 0
 	};
-	var r = "textures/Bridge2/";
-	var urls = [ r + "posx.jpg", r + "negx.jpg",
-				 r + "posy.jpg", r + "negy.jpg",
-				 r + "posz.jpg", r + "negz.jpg" ];
+	var imagePrefix = "images/dawnmountain-";
+	var urls  = [imagePrefix + "xpos.png", imagePrefix + "xneg.png", imagePrefix + "ypos.png", imagePrefix + "yneg.png", imagePrefix + "zpos.png", imagePrefix + "zneg.png"];
 
 	var textureCube = THREE.ImageUtils.loadTextureCube( urls );
 	textureCube.format = THREE.RGBFormat;
@@ -84,9 +82,9 @@ function Cars(selectedCar) {
 		wheelLoader = new THREE.JSONLoader();
 		bodyLoader = new THREE.BinaryLoader();
 		connectionPoint = new THREE.Vector3(
-								2.5,
+								2.3,
 								-1,
-								3.1
+								3.5
 							);
 	}else if(selectedCar == "mustang") {
 		bodyUrl = "models/cars/mustang/mustang.js";
@@ -102,8 +100,8 @@ function Cars(selectedCar) {
 	}
 	scene.addEventListener('update', updateCar);
 	loadCar();
-	document.addEventListener( 'keydown', onKeyDown, false );
-	document.addEventListener( 'keyup', onKeyUp, false );
+	$(document).keydown(onKeyDown);
+	$(document).keyup(onKeyUp);
 	
 	function loadCar() {
 		// Car Body load
@@ -133,6 +131,10 @@ function Cars(selectedCar) {
 					6000	// max_suspension_force
 				));
 				mesh.addEventListener( 'collision', function( raceTrack, linear_velocity ) {
+					if(damage >= 100) {
+						crashed = true;
+						return
+					}
 					damage += 1+(speed/10);
 					$("#damage").css("background-image", "-moz-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
 					$("#damage").css("background-image", "-webkit-linear-gradient(left, #8B0000 "+damage+"%, transparent 1%)");
@@ -192,7 +194,7 @@ function Cars(selectedCar) {
 			}else if(selectedCar == "gallardo"){
 				if(car_materials) {
 					car_materials[ 0 ] = mlib[ "Orange" ]; 			// body
-					car_materials[ 1 ] = mlib[ "Dark glass" ]; 		// front under lights, back
+					car_materials[ 1 ] = mlib[ "Black glass" ]; 		// front under lights, back
 					car_materials[ 2 ] = mlib[ "Yellow glass" ];		// windshield	
 					car_materials[ 3 ] = mlib[  "Dark chrome"  ];
 					car_materials[ 4 ] = mlib[ "Black metal" ];
@@ -202,11 +204,11 @@ function Cars(selectedCar) {
 				}
 			}else if(selectedCar == "mustang"){
 				if(car_materials) {
-					car_materials[ 0 ] = mlib[ "Dark glass" ]; 		//Windows
+					car_materials[ 0 ] = mlib[ "Black glass" ]; 		//Windows
 					car_materials[ 1 ] = mlib[ "Chrome" ]; 				//Kühlergrill
 					car_materials[ 2 ] = mlib[ "Red" ];					//Lights, Auspuff	
 					car_materials[ 3 ] = mlib[  "Black rough"  ];		//Bottom
-					car_materials[ 4 ] = mlib[ "Gold" ];				//Body
+					car_materials[ 4 ] = mlib[ "Black metal" ];				//Body
 				}else if(wheel_materials){
 					wheel_materials[ 0 ] = mlib[ "Chrome" ];	// insides
 					wheel_materials[ 1 ] = mlib[ "Chrome" ];	// insides						
@@ -215,7 +217,7 @@ function Cars(selectedCar) {
 	};
 
 	function onKeyDown ( ev ) {
-		switch ( ev.keyCode ) {
+		switch ( ev.which ) {
 			case 37: // left
 				input.direction = 1;
 				break;
@@ -241,7 +243,7 @@ function Cars(selectedCar) {
 	};
 
 	function onKeyUp ( ev ) {
-		switch ( ev.keyCode ) {
+		switch ( ev.which ) {
 			case 37: // left
 				input.direction = null;
 				break;

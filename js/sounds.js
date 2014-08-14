@@ -16,6 +16,7 @@ var Sound = function ( sources, radius, volume ) {
 	this.play = function () {
 
 		audio.play();
+		audio.loop = true;
 
 	}
 

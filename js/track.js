@@ -4,7 +4,7 @@ function Track() {
 	this.addGround = function() {
 		// Ground
 		var ground_material = Physijs.createMaterial(
-			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'models/tracks/MountainTrack/Grass_256.png' ) }),
+			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'textures/Grass_256-b.jpeg' ) }),
 			1, // high friction
 			1 // low restitution
 		);
@@ -17,7 +17,7 @@ function Track() {
 
 		// If your plane is not square as far as face count then the HeightfieldMesh
 		// takes two more arguments at the end: # of x faces and # of z faces that were passed to THREE.PlaneMaterial
-		var ground = new Physijs.BoxMesh(
+		var ground = new Physijs.PlaneMesh(
 				ground_geometry,
 				ground_material,
 				0 // mass
@@ -53,7 +53,7 @@ Track.prototype.loadTrack = function(selectedTrack){
 					1.0 // restitution
 					),0 //mass
 			);
-			raceStreet.castShadow = raceStreet.receiveShadow = true;
+			raceStreet.receiveShadow = true;
 			scene.add(raceStreet);	
 		});
 		this.vehiclePosition.set(-95,10,50);

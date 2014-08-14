@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>sensor-based-highspeed-race</title>	
+		<title>sensor-based-highspeed-race</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 		<link href="css/style.css" rel="stylesheet" type="text/css" />
 		<script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
 		<script src="js/ColladaLoader.js"></script>
 
 		<script src="js/BinaryLoader.js"></script>
@@ -29,6 +29,8 @@
 		<script type="text/javascript" src="js/game.js"></script>
 		<script type="text/javascript" src="js/timer.js"></script>
 		<script type="text/javascript" src="js/track.js"></script>
+		
+		<script type="text/javascript" src="js/deviceController.js"></script>
 
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 	<script type="text/javascript">
@@ -40,6 +42,7 @@
 			initScene($('input[name=gender]:checked', '#selectCar').val(), $('input[name=gender]:checked', '#selectTrack').val());
 			$("#startpage").hide();
 			$("#game").children().show();
+			$("#result").hide();
 		});
 	});
 	</script>
@@ -120,24 +123,19 @@
 									<label for="mountain-track"></label>
 								</div>
 							</li>
-							<li>
-								<a>City Speedway</a>
-								<div class="round-button">
-									<div class="round-button-circle"> 
-										<img class="size" src="images/gallardo.gif">
-									</div>
-								</div>
-								<div class="radio">
-									<input id="city" type="radio" name="gender" value="city">
-									<label for="city"></label>
-								</div>
-							</li>
 						</ul>
 					</form>
 				</div>
 			</div>
 	</div>
 	<div id="game">
+		<div id="result">
+			<div class="win">Du hast die Strecke erfolgreich beendet. Deine Zeit:
+				<div class="time"></div>
+			</div>
+			<div class="crash">Du hast dein Auto geschrottet! Versuch es noch einmal.</div>
+			<a class="restart button gray" href="#">Restart</a>
+		</div>
 		<div id="timer">00:00:000</div>
 		<div id="tacho">
 			<div id="speedometer"></div>
