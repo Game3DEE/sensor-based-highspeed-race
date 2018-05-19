@@ -266,29 +266,34 @@ function Cars(selectedCar) {
 
 	function updateCar() {
 		if ( input && vehicle ) {
-			speed = Math.sqrt(Math.pow(vehicle.mesh.getLinearVelocity().x, 2)+Math.pow(vehicle.mesh.getLinearVelocity().z, 2))*1.5; // y kann vernachlässigt werden!
+			speed = Math.sqrt( Math.pow(vehicle.mesh.getLinearVelocity().x, 2) +
+                         Math.pow(vehicle.mesh.getLinearVelocity().z, 2)) * 1.5; // y kann vernachlässigt werden!
 			if(speed < 0)
 				speedometer.update(speed * -1);
 			else
 				speedometer.update(speed * 1);
-			tachometer.update(((speed*100)%4000)+1000);
-			if ( input.direction !== null ) {
-				input.steering += input.direction / 50;
-				if ( input.steering < -.6 ) 
-					input.steering = -.6;
-				if ( input.steering > .6 ) 
-					input.steering = .6;
-			}
-			vehicle.setSteering( input.steering, 0 );
-			vehicle.setSteering( input.steering, 1 );
 
-			if ( input.power === true ) {
-				vehicle.applyEngineForce( 1000 );
-			} else if ( input.power === false ) {
-				vehicle.applyEngineForce( -1000 );
-			} else {
-				vehicle.applyEngineForce( 0 );
-			}
+			tachometer.update(((speed * 100) % 4000) + 1000);
+
+      if (input.direction != null) {
+        vehicle.setSteering( input.direction * 0.3, 0 );
+        vehicle.setSteering( input.direction * 0.3, 1 );
+      } else {
+        vehicle.setSteering( 0, 0 );
+        vehicle.setSteering( 0, 1 );
+      }
+
+      if (input.power != null) {
+        vehicle.applyEngineForce( input.power ? 500 : -300, 2 );
+        vehicle.applyEngineForce( input.power ? 500 : -300, 3 );
+      } else {
+        vehicle.applyEngineForce(0, 2);
+        vehicle.applyEngineForce(0, 3);
+
+        //Default braking force, always added otherwise there is no friction on the wheels
+        vehicle.setBrake(10, 2);
+        vehicle.setBrake(10, 3);
+      }
 		}
 
 		scene.simulate( undefined, 2 );
